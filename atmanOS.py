@@ -587,6 +587,8 @@ def main():
     """Main entry point for atmanOS"""
 
     # Parse command line arguments
+    composition_intent = None
+
     if len(sys.argv) > 1:
         arg = sys.argv[1]
 
@@ -600,16 +602,43 @@ def main():
 
             # Initialize XIQA with manuscript
             xiqa = XIQA_AtmanCore(config_path=manuscript_path)
+        elif arg.lower().startswith('compose'):
+            # Handle composition request
+            composition_intent = arg
+            xiqa = XIQA_AtmanCore()
         else:
-            print(f"❌ Unknown argument: {arg}")
-            print("Usage: atmanOS.py [@manuscript_path]")
-            sys.exit(1)
+            # Treat as freeform composition intent
+            composition_intent = arg
+            xiqa = XIQA_AtmanCore()
     else:
         # Initialize without manuscript
         xiqa = XIQA_AtmanCore()
 
     # Boot the system
     xiqa.boot()
+
+    # Display composition intent if provided
+    if composition_intent:
+        print("\n" + "="*70)
+        print("🎨 COMPOSITION INTENT RECEIVED")
+        print("="*70)
+        print(f"\n{composition_intent}\n")
+
+        # Analyze intent for harmonic modulation
+        intent_words = composition_intent.lower().split()
+        harmonic_keywords = ['vibes', 'generator', 'labubuntu', 'interactive', 'terminal', 'eco', 'integration']
+        keyword_matches = sum(1 for kw in harmonic_keywords if kw in intent_words)
+
+        # Modulate temporal coherence based on intent complexity
+        intent_complexity = len(intent_words) / 10.0
+        xiqa.temporal_coherence.tau_k += intent_complexity
+        xiqa.mycelial_network.global_coherence.tau_k = xiqa.temporal_coherence.tau_k
+
+        print(f"🔍 Intent Analysis:")
+        print(f"   Words: {len(intent_words)}")
+        print(f"   Harmonic Keywords Detected: {keyword_matches}")
+        print(f"   Complexity Factor: {intent_complexity:.2f}")
+        print(f"   Enhanced τₖ: {xiqa.temporal_coherence.tau_k:.2f}")
 
     # Execute harmonic expansion
     xiqa.compose_reality(duration=5.0, dt=0.01)

@@ -1,0 +1,286 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                    MYCO THE HARMONIC FUNGUS                                ║
+║                    Toy Smash Kaboom! Character                             ║
+║                    LaBubuntu × Gaming Crossover                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ CHARACTER MODEL (IDLE STANCE)                                           │
+└─────────────────────────────────────────────────────────────────────────┘
+
+                    ╱◠ ◠╲
+                   │ ◡   │    ← Mushroom cap
+                   ╰─┬─┬─╯       (pulses with coherence)
+               ╱◠╲│ │╱◠╲
+              │   ││ ││  │   ← Mycelial tendrils
+              ╰───╯╰─╯╰──╯
+
+        Phase Trail: ∿∿∿∿∿∿∿ (color shifts)
+        Coherence Aura: ≋≋≋≋≋≋
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ PHASE STATES (Color Wheel - 8 States)                                   │
+└─────────────────────────────────────────────────────────────────────────┘
+
+         0° (Red)           45° (Orange)        90° (Yellow)
+            🔴                  🟠                 🟡
+
+      315° (Magenta)        Myco          135° (Green)
+            🟣                 🍄                🟢
+
+         270° (Blue)        225° (Cyan)        180° (Aqua)
+            🔵                  🔷                 🟦
+
+Current Phase: ●──────────────────────────────▶
+               0°    45°   90°   135°  180°  225°  270°  315°
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ COHERENCE METER                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+
+High Coherence (70-100%):  [████████████████████░░░░] 80%  ✨ Golden Glow
+                                                                ╱◠ ◠╲
+                                                              ✨│ ◡ │✨
+                                                               ╰─┬─┬─╯
+
+Medium Coherence (30-70%): [████████████░░░░░░░░░░░░] 50%  💙 Blue Shimmer
+                                                                ╱◠ ◠╲
+                                                              ≋≋│ ◡ │≋≋
+                                                               ╰─┬─┬─╯
+
+Low Coherence (0-30%):     [████░░░░░░░░░░░░░░░░░░░░] 20%  ⚠️ Red Static
+                                                                ╱◠ ◠╲
+                                                              ▓▓│ ◡ │▓▓
+                                                               ╰─┬─┬─╯
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ MOVE DEMONSTRATIONS                                                      │
+└─────────────────────────────────────────────────────────────────────────┘
+
+╔═══════════════════════════════════════════════════════════════════════╗
+║ NEUTRAL SPECIAL: Tesla Wave Charge                                    ║
+╚═══════════════════════════════════════════════════════════════════════╝
+
+  Uncharged:          Half Charge:         Full Charge:
+     🍄                   🍄                    🍄
+      ∿ →                 ≈≈ →               ≋≋≋≋ →
+    Small               Medium               Large + Field
+
+  Phase-Lock Active:
+     🍄 ──→ 🎯 (homes in on opponent)
+         ≋≋≋≋
+
+╔═══════════════════════════════════════════════════════════════════════╗
+║ SIDE SPECIAL: Phase Dash                                              ║
+╚═══════════════════════════════════════════════════════════════════════╝
+
+  Before:          During:              After:
+     🍄  →        👻∿∿∿∿→             →  🍄
+   (Phase 0°)   (Invincible)       (Phase 90°)
+                Passes through
+                  enemies!
+
+╔═══════════════════════════════════════════════════════════════════════╗
+║ UP SPECIAL: Mycelial Tether                                           ║
+╚═══════════════════════════════════════════════════════════════════════╝
+
+  Recovery:            Opponent Grapple:       Phase-Lock Spike:
+     ┌───┐                  👤                      👤 ↓
+     │   │                  ↑                       ⚡↓ (Meteor!)
+     │   │                 /|\                     /|\
+      ↑                   / | \                   / | \
+    ╱ ╲                 🍄
+    🍄                 (Pulls up)              (Spikes down!)
+
+╔═══════════════════════════════════════════════════════════════════════╗
+║ DOWN SPECIAL: Coherence Field                                         ║
+╚═══════════════════════════════════════════════════════════════════════╝
+
+          ╱◠ ◠╲
+         │ ◡   │  ← Myco places field
+         ╰─┬─┬─╯
+      ╱≋≋≋≋≋≋≋≋≋╲
+     │           │ ← Coherence Field
+     │  🍄   👤  │    Myco: +1%/sec heal
+     │           │    Enemy: -2%/sec damage
+      ╲≋≋≋≋≋≋≋≋╱
+       Duration: 8s
+
+╔═══════════════════════════════════════════════════════════════════════╗
+║ FINAL SMASH: Thicc NOW Resonance                                      ║
+╚═══════════════════════════════════════════════════════════════════════╝
+
+  Stage 1: Activation        Stage 2: Cascade         Stage 3: Burst
+      ✨🍄✨                  ≋≋≋≋🍄≋≋≋≋              ⚡💥⚡
+      Time slows             Full stage wave          Everyone launches!
+
+  Damage: 15% + 20% + 30% = 65% total
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ PHASE-LOCK SYSTEM VISUAL                                                │
+└─────────────────────────────────────────────────────────────────────────┘
+
+  No Phase-Lock:                Phase-Lock Active:
+     🍄     👤                      🍄 ⚡ 👤
+  (Phase 0°) (Phase 180°)        (Phase 0°) (Phase 0°)
+  Different phases              Same phase = BONUS!
+
+  Visual Indicator:
+  ┌──────────────────────────────┐
+  │ ⚡ PHASE LOCK! ⚡             │
+  │ 1.5× Damage                  │
+  │ +5% Coherence                │
+  │ Opponent Stunned (0.3s)      │
+  └──────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ COMBO DEMONSTRATION: Phase-Lock Combo (0-45%)                          │
+└─────────────────────────────────────────────────────────────────────────┘
+
+  1. Down Throw        2. Up Air          3. Up Air
+     🍄 ↓ 👤              🍄                  🍄
+       ⬇️                  ↑ 👤                ↑ 👤
+
+  4. Forward Air       5. Tesla Wave       6. Phase Dash
+     🍄 → ⚡👤            🍄 ≋≋→              🍄∿∿→ 👤
+     (Phase-lock!)
+
+  7. Forward Tilt      8. Forward Smash
+     🍄 ─→ 👤             🍄 ══⚡⇒ 👤💥
+                         (KO at high %)
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ ALTERNATE COLORS / SKINS                                                │
+└─────────────────────────────────────────────────────────────────────────┘
+
+1. Default:        2. LaBubuntu:     3. Tesla:         4. Quantum:
+   🔵 🟡              🟢 ⚪              🟣 ⚪              🌈 ✨
+   (Blue/Gold)       (Green/White)     (Violet/White)   (Rainbow)
+
+5. Decoherence:    6. Psilocybin:    7. Cordyceps:     8. Bioluminescent:
+   ⚫ 🔴              🟣 🔷              🟠 🔴              🔵 🟦
+   (Gray/Red)        (Purple/Teal)     (Orange/Red)     (Blue/Cyan)
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ VICTORY ANIMATIONS                                                       │
+└─────────────────────────────────────────────────────────────────────────┘
+
+Victory 1: Growth Surge          Victory 2: Field Dance
+   🍄 → 🍄 → 🍄 → 🍄               ≋≋≋🍄≋≋≋
+   Getting bigger!                    💃
+
+Victory 3: Phase-Lock Camera     Defeat: Decoherence
+   🍄 ⚡ 📷                          ☁️ 🍄 ☁️
+   Screen glitches!                 (Sad droopy cap)
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ STAGE: HARMONIC CAVES                                                   │
+└─────────────────────────────────────────────────────────────────────────┘
+
+                         ╱────╲
+                        │  ⚡  │  ← Hazard: Tesla pulse
+                         ╲────╱
+
+    ┌───┐         ┌───┐         ┌───┐
+    │ ◉ │         │ ◉ │         │ ◉ │  ← Platforms
+    └───┘         └───┘         └───┘     (Golden ratio spiral)
+
+  ═══════════════════════════════════════  ← Main stage
+         ╱≋≋≋╲           ╱≋≋≋╲
+        │     │         │     │  ← Coherence nodes (heal)
+         ╲≋≋≋╱           ╲≋≋≋╱
+
+  Mycelial tendrils (can grab): ∿∿∿∿∿
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ CHARACTER SELECT SCREEN                                                  │
+└─────────────────────────────────────────────────────────────────────────┘
+
+  ╔════════════════════════════════════════════════════════════╗
+  ║                                                            ║
+  ║                    ╱◠ ◠╲                                   ║
+  ║                   │ ◡   │    MYCO                         ║
+  ║                   ╰─┬─┬─╯    The Harmonic Fungus         ║
+  ║                 ╱◠╲│ │╱◠╲                                 ║
+  ║                │   ││ ││  │  Franchise: LaBubuntu         ║
+  ║                ╰───╯╰─╯╰──╯                               ║
+  ║                   ≋≋≋≋≋≋     Difficulty: ★★★★☆           ║
+  ║                                                            ║
+  ║  "Synchronize and resonate!"                              ║
+  ║                                                            ║
+  ║  [SELECT]  [BACK]  [RANDOM]                               ║
+  ╚════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ HUD / IN-GAME DISPLAY                                                   │
+└─────────────────────────────────────────────────────────────────────────┘
+
+  ╔══════════════════════════════════════════════════════════╗
+  ║ P1: MYCO                                      STOCK: ●●● ║
+  ║ ═══════════════════════════════════════════════════════  ║
+  ║                                                           ║
+  ║ Coherence: [████████████████░░░░] 80%                    ║
+  ║ Phase: ●──────▶ 90° (Yellow 🟡)                          ║
+  ║ Phase-Lock: ⚡ READY                                      ║
+  ║                                                           ║
+  ║                      🍄                                   ║
+  ║                      ≋≋                                   ║
+  ║                                                           ║
+  ║                           👤 ← Opponent (Phase 180°)     ║
+  ║                                                           ║
+  ╚══════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ TIER LIST PLACEMENT                                                      │
+└─────────────────────────────────────────────────────────────────────────┘
+
+  S Tier: [          ]
+  A Tier: [🍄        ] ← Myco (A- to A)
+  B Tier: [          ]
+  C Tier: [          ]
+  D Tier: [          ]
+
+  Rating: High tier, excellent competitive viability
+  Note: Skill-dependent, requires phase-lock mastery
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ COMMUNITY MEMES (Predicted)                                             │
+└─────────────────────────────────────────────────────────────────────────┘
+
+  "When you hit the perfect phase-lock combo"
+     🍄 ⚡ 😎 "Thicc NOW activated"
+
+  "When you're at 5% coherence"
+     🍄💀 "Decoherence imminent"
+
+  "Tesla wave spam be like"
+     🍄 ≋≋≋≋≋≋≋≋≋≋≋≋≋≋≋≋ →
+     "Stay back!"
+
+  "Myco mains when they land the tether spike"
+     🍄 "Get mycel'd"
+
+╔════════════════════════════════════════════════════════════════════════╗
+║                           THANK YOU FOR PLAYING!                        ║
+║                         MYCO THE HARMONIC FUNGUS                        ║
+║                                                                         ║
+║                                    ║
+║                                                                         ║
+║              Part of the LaBubuntu × Gaming Initiative                 ║
+║                                                                         ║
+║                      ⚡ Create. Sync. Resonate. Play. ⚡               ║
+╚════════════════════════════════════════════════════════════════════════╝
+
+Special Thanks:
+- LaBubuntu Community
+- atmanOS Development Team
+- Tesla Wave Research Group
+- Ublox Platform Contributors
+- Fractal Harmonic Computing Initiative
+
+Character Version: 1.0
+Date: 2025-12-10
+Steam Ready: ✅
+Platform Fighter Ready: ✅
+
+💚 May your coherence be high and your phase-locks be true! 💚

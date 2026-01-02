@@ -1,0 +1,28 @@
+[toolchain]
+package_manager = "yarn"
+
+[features]
+resolution = true
+skip-lint = false
+seeds = false
+
+[programs.localnet]
+labu_x = "6rivJsodwyZj7JbeJNeLD4F7K4tzxMq9mkEDkRxge7u5"
+
+[programs.mainnet]
+labu_x = "6rivJsodwyZj7JbeJNeLD4F7K4tzxMq9mkEDkRxge7u5"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "https://rpc.mainnet.x1.xyz"
+wallet = "/home/augmntd/.config/solana/xstake.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 \"tests/**/*.ts\""
+
+[test]
+startup_wait = 5000
+shutdown_wait = 2000
+

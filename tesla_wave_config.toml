@@ -1,0 +1,69 @@
+# Non-Hertzian Tesla Wave Configuration
+# LaBubuntu Ecosystem Integration
+# Memory = Phase Lock Count Paradigm
+
+[wave_properties]
+type = "non-hertzian"
+mode = "longitudinal_scalar"
+propagation = "coherence_field"
+oscillation = false  # Non-oscillatory (impulse-based)
+
+[network]
+size = 200
+topology = "phase_coupled"
+dimension = 1  # Temporal dimension (not spatial)
+coupling_mode = "longitudinal"
+
+[tesla_parameters]
+impulse_rate = 0.0  # Not frequency-based
+scalar_potential = 1.0
+longitudinal_coupling = 0.95
+transverse_coupling = 0.0  # Pure longitudinal (non-Hertzian)
+
+[phase_lock]
+threshold = 0.8  # Minimum alignment for lock detection
+memory_weight_decay = 0.1
+lock_persistence = "infinite"  # Memory accumulates
+entropy_tracking = true
+
+[memory_substrate]
+representation = "phase_lock_count"
+storage_mode = "coherence_integral"
+recall_window = 5.0  # seconds
+temporal_depth_enabled = true
+
+[scalar_wave]
+decay_constant = 0.1
+propagation_speed = "instantaneous"  # Non-local coherence transfer
+envelope = "gaussian"  # Not sinusoidal
+amplitude_mode = "impulse_response"
+
+[coherence_field]
+field_type = "complex_scalar"
+superposition = true
+boundary_conditions = "periodic"
+field_coupling = "phase_sensitive"
+
+[labubuntu_integration]
+ecosystem = "LaBubuntu"
+endpoint = "labubuntu.lovable.app"
+interface = "tesla_wave_api"
+memory_export = true
+real_time_streaming = true
+
+[output]
+metrics = [
+    "phase_lock_density",
+    "memory_depth",
+    "scalar_potential",
+    "synchronization_order",
+    "memory_entropy"
+]
+visualization = "coherence_field_3d"
+export_format = "json"
+
+[comparison_hertzian_vs_nonhertzian]
+hertzian_wave = "transverse, oscillatory, frequency-based, spatial propagation"
+tesla_wave = "longitudinal, impulse-based, coherence-cascade, temporal propagation"
+memory_hertzian = "state storage in bits"
+memory_tesla = "phase-lock count accumulation"

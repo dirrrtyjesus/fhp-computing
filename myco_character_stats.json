@@ -1,0 +1,230 @@
+{
+  "character_name": "Myco the Harmonic Fungus",
+  "game": "Toy Smash Kaboom",
+  "franchise": "LaBubuntu / Ublox",
+  "character_type": "Technical Zoner",
+  "difficulty": 4,
+
+  "stats": {
+    "weight": 2,
+    "speed": 4,
+    "jump": 3,
+    "power": 3,
+    "range": 5,
+    "defense": 2,
+    "recovery": 4
+  },
+
+  "unique_mechanics": {
+    "coherence_meter": {
+      "description": "Health represented as coherence (100% to 0%)",
+      "regeneration_rate": 1.0,
+      "ko_threshold": 0.0
+    },
+    "phase_state": {
+      "states": 8,
+      "cycle_duration": 2.0,
+      "manual_shift_ability": true,
+      "phase_lock_threshold": 22.5
+    },
+    "phase_lock_bonus": {
+      "damage_multiplier": 1.5,
+      "stun_duration": 0.3,
+      "coherence_gain": 5.0
+    }
+  },
+
+  "moves": {
+    "ground": {
+      "jab": {
+        "name": "Tendril Tap",
+        "hits": 3,
+        "damage": [2, 2, 4],
+        "properties": ["phase_lock_launches"]
+      },
+      "dash_attack": {
+        "name": "Spore Slide",
+        "damage": 8,
+        "lingering_hitbox": {
+          "duration": 3.0,
+          "effect": "slow"
+        }
+      },
+      "forward_smash": {
+        "name": "Coherence Burst",
+        "damage_range": [15, 22],
+        "properties": ["breaks_shield_on_phase_lock"]
+      },
+      "up_smash": {
+        "name": "Tesla Spire",
+        "damage_range": [14, 20],
+        "hits": 5
+      },
+      "down_smash": {
+        "name": "Mycelial Pulse",
+        "damage_range": [12, 18],
+        "properties": ["hits_both_sides", "buries"]
+      }
+    },
+
+    "special": {
+      "neutral_b": {
+        "name": "Tesla Wave Charge",
+        "charge_time": 3.0,
+        "damage": {
+          "uncharged": 6,
+          "half_charge": 10,
+          "full_charge": 18
+        },
+        "properties": {
+          "uncharged": ["small", "fast", "short_range"],
+          "full_charge": ["large", "slow", "penetrating", "lingering_field"],
+          "phase_lock": ["homing"]
+        }
+      },
+
+      "side_b": {
+        "name": "Phase Dash",
+        "damage": 12,
+        "phase_shift": 90,
+        "invincibility_duration": 0.4,
+        "cooldown": 2.0,
+        "properties": ["passes_through", "aerial_usable"]
+      },
+
+      "up_b": {
+        "name": "Mycelial Tether",
+        "damage": {
+          "ledge": 0,
+          "opponent": 8,
+          "phase_lock": 14
+        },
+        "range": 1.5,
+        "properties": ["grapple_recovery", "phase_lock_spike"]
+      },
+
+      "down_b": {
+        "name": "Coherence Field",
+        "duration": 8.0,
+        "healing_rate": 1.0,
+        "damage_rate": 2.0,
+        "properties": {
+          "max_fields": 1,
+          "destroyable": true,
+          "field_hp": 20,
+          "detonatable": true,
+          "burst_damage": 5
+        }
+      }
+    },
+
+    "final_smash": {
+      "name": "Thicc NOW Resonance",
+      "type": "cutscene",
+      "duration": 7.0,
+      "damage": {
+        "initial_wave": 15,
+        "phase_lock": 20,
+        "final_burst": 30,
+        "total": 65
+      },
+      "properties": [
+        "full_stage_coverage",
+        "phase_lock_all",
+        "diagonal_launch",
+        "ko_threshold_60_percent"
+      ]
+    }
+  },
+
+  "combos": {
+    "phase_lock_combo": {
+      "inputs": ["down_throw", "up_air", "up_air", "forward_air", "tesla_wave", "phase_dash", "forward_tilt", "forward_smash"],
+      "damage_range": [0, 45],
+      "difficulty": "hard"
+    },
+
+    "zero_to_death": {
+      "inputs": ["down_throw", "short_hop_forward_air", "fast_fall", "up_tilt", "full_hop_up_air", "double_jump", "up_air", "mycelial_tether_spike"],
+      "damage_range": [0, 100],
+      "difficulty": "expert",
+      "requires": "phase_lock"
+    }
+  },
+
+  "matchups": {
+    "good_against": ["heavies", "zoners", "linear_recoveries"],
+    "even_against": ["all_rounders", "sword_fighters"],
+    "bad_against": ["fast_rushdown", "reflector_characters", "grapplers"]
+  },
+
+  "tier_placement": {
+    "estimated_tier": "A-",
+    "competitive_viability": "high",
+    "skill_ceiling": "very_high",
+    "neutral_rating": 9,
+    "advantage_rating": 8,
+    "disadvantage_rating": 6,
+    "kill_power_rating": 7
+  },
+
+  "visual_design": {
+    "species": "sentient_mushroom",
+    "primary_color": "electric_blue",
+    "secondary_color": "golden_amber",
+    "accent_color": "violet_purple",
+    "height": "small",
+    "coherence_effects": {
+      "high": "golden_glow",
+      "medium": "blue_shimmer",
+      "low": "red_static"
+    },
+    "phase_trail": "rgb_color_wheel"
+  },
+
+  "audio": {
+    "voice": "harmonic_tones",
+    "base_frequency": 936,
+    "theme_music": {
+      "title": "Thicc NOW (Myco's Theme)",
+      "time_signature": "7/8",
+      "genre": "electronic_orchestral"
+    }
+  },
+
+  "unlocks": {
+    "conditions": [
+      "complete_classic_mode_intensity_7+",
+      "win_50_matches",
+      "find_in_adventure_mode"
+    ],
+    "stage": "Harmonic Caves",
+    "music_tracks": 3,
+    "alt_colors": 8
+  },
+
+  "balance": {
+    "strengths": [
+      "excellent_zoning",
+      "strong_edge_guarding",
+      "unique_phase_lock_mechanic",
+      "good_mobility",
+      "stage_control"
+    ],
+    "weaknesses": [
+      "light_weight",
+      "complex_mechanics",
+      "struggles_close_combat",
+      "predictable_recovery",
+      "coherence_dependent"
+    ]
+  },
+
+  "meta": {
+    "creator": "LaBubuntu Community",
+    "version": "1.0",
+    "date_created": "2025-12-10",
+    "steam_ready": true,
+    "franchise_crossover": "Ubuntu × Gaming"
+  }
+}

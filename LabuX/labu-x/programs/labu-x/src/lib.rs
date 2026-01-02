@@ -21,58 +21,87 @@ pub mod labux {
     use super::*;
 
     /// Initialize the LabuX protocol
-    pub fn initialize(
-        ctx: Context<Initialize>,
-        window_epoch: i64,
-    ) -> Result<()> {
-        instructions::initialize::handler(ctx, window_epoch)
-    }
+    // pub fn initialize(
+    //     ctx: Context<Initialize>,
+    //     window_epoch: i64,
+    // ) -> Result<()> {
+    //     instructions::initialize::handler(ctx, window_epoch)
+    // }
 
     /// Mint LabuX with 1:1 collateral backing
-    pub fn mint(
-        ctx: Context<MintLabuX>,
-        amount: u64,
-    ) -> Result<()> {
-        instructions::mint::handler(ctx, amount)
-    }
+    // pub fn mint(
+    //     ctx: Context<MintLabuX>,
+    //     amount: u64,
+    // ) -> Result<()> {
+    //     instructions::mint::handler(ctx, amount)
+    // }
 
     /// Burn LabuX and receive collateral
-    pub fn burn(
-        ctx: Context<BurnLabuX>,
-        amount: u64,
-    ) -> Result<()> {
-        instructions::burn::handler(ctx, amount)
-    }
+    // pub fn burn(
+    //     ctx: Context<BurnLabuX>,
+    //     amount: u64,
+    // ) -> Result<()> {
+    //     instructions::burn::handler(ctx, amount)
+    // }
 
     /// Transfer LabuX with optional TCP
-    pub fn transfer_with_tcp(
-        ctx: Context<TransferWithTCP>,
-        amount: u64,
-        include_tcp: bool,
-    ) -> Result<()> {
-        instructions::transfer::handler(ctx, amount, include_tcp)
-    }
+    // pub fn transfer_with_tcp(
+    //     ctx: Context<TransferWithTCP>,
+    //     amount: u64,
+    //     include_tcp: bool,
+    // ) -> Result<()> {
+    //     instructions::transfer::handler(ctx, amount, include_tcp)
+    // }
 
     /// Accrue TCP for an account
-    pub fn accrue_tcp(ctx: Context<AccrueTCP>) -> Result<()> {
-        instructions::accrue_tcp::handler(ctx)
-    }
+    // pub fn accrue_tcp(ctx: Context<AccrueTCP>) -> Result<()> {
+    //     instructions::accrue_tcp::handler(ctx)
+    // }
 
     /// Harvest TCP during harmonic window
-    pub fn harvest_tcp(ctx: Context<HarvestTCP>) -> Result<()> {
-        instructions::harvest_tcp::handler(ctx)
-    }
+    // pub fn harvest_tcp(ctx: Context<HarvestTCP>) -> Result<()> {
+    //     instructions::harvest_tcp::handler(ctx)
+    // }
 
     /// Update account τₖ (oracle/governance)
-    pub fn update_tau_k(
-        ctx: Context<UpdateTauK>,
-        new_tau_k: u64,
-    ) -> Result<()> {
-        instructions::update_tau_k::handler(ctx, new_tau_k)
-    }
+    // pub fn update_tau_k(
+    //     ctx: Context<UpdateTauK>,
+    //     new_tau_k: u64,
+    // ) -> Result<()> {
+    //     instructions::update_tau_k::handler(ctx, new_tau_k)
+    // }
 
     /// Record phase lock event
-    pub fn record_phase_lock(ctx: Context<RecordPhaseLock>) -> Result<()> {
-        instructions::record_phase_lock::handler(ctx)
+    // pub fn record_phase_lock(ctx: Context<RecordPhaseLock>) -> Result<()> {
+    //     instructions::record_phase_lock::handler(ctx)
+    // }
+
+    // --- Genesis Fund (PTO²) Instructions ---
+
+    /// Invest in the Temporal Genesis Fund
+    pub fn invest_infall(
+        ctx: Context<Invest>,
+        amount: u64,
+    ) -> Result<()> {
+        instructions::genesis::invest::handler(ctx, amount)
+    }
+
+    /// Spawn a new Child PTO
+    /// Spawn a new Child PTO
+    pub fn spawn_child_pto(
+        ctx: Context<SpawnChildPTO>,
+        sector: [u8; 16],
+        funding_goal: u64,
+        coherence_mass: u64,
+    ) -> Result<()> {
+        instructions::genesis::spawn::handler(ctx, sector, funding_goal, coherence_mass)
+    }
+
+    /// Emit Hawking Yields
+    pub fn emit_hawking_yield(
+        ctx: Context<EmitYield>,
+        coherence_score: u16,
+    ) -> Result<()> {
+        instructions::genesis::emit::handler(ctx, coherence_score)
     }
 }

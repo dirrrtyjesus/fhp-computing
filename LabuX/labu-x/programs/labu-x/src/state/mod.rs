@@ -1,5 +1,7 @@
 use anchor_lang::prelude::*;
 
+pub mod genesis_fund;
+
 /// Global protocol state (PDA)
 #[account]
 #[derive(Default)]
@@ -41,7 +43,7 @@ pub struct ProtocolState {
     pub bump: u8,
 
     /// Reserved for future use
-    pub _reserved: [u8; 64],
+    pub _reserved: [u8; 32],
 }
 
 impl ProtocolState {

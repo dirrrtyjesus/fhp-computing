@@ -2,8 +2,10 @@ use anchor_lang::prelude::*;
 
 #[error_code]
 pub enum LabuXError {
-    #[msg("Insufficient balance")]
-    InsufficientBalance,
+    #[msg("Insufficient capital in Allocation Pool")]
+    InsufficientBasinDepth,
+    #[msg("Token Mint does not match Temporal Genesis Fund")]
+    InvalidTokenMint,
 
     #[msg("Insufficient collateral")]
     InsufficientCollateral,

@@ -4,7 +4,6 @@ pub mod genesis_fund;
 
 /// Global protocol state (PDA)
 #[account]
-#[derive(Default)]
 pub struct ProtocolState {
     /// Protocol authority
     pub authority: Pubkey,
@@ -43,7 +42,7 @@ pub struct ProtocolState {
     pub bump: u8,
 
     /// Reserved for future use
-    pub _reserved: [u8; 32],
+    pub _reserved: [u8; 64],
 }
 
 impl ProtocolState {
@@ -63,9 +62,28 @@ impl ProtocolState {
         64;   // reserved
 }
 
+impl Default for ProtocolState {
+    fn default() -> Self {
+        Self {
+            authority: Pubkey::default(),
+            labux_mint: Pubkey::default(),
+            collateral_mint: Pubkey::default(),
+            collateral_vault: Pubkey::default(),
+            total_tcp: 0,
+            network_tau_k: 0,
+            window_epoch: 0,
+            total_collateral: 0,
+            total_supply: 0,
+            coherence_oracle: Pubkey::default(),
+            paused: false,
+            bump: 0,
+            _reserved: [0u8; 64],
+        }
+    }
+}
+
 /// Individual account TCP state (PDA per user)
 #[account]
-#[derive(Default)]
 pub struct AccountState {
     /// Account owner
     pub owner: Pubkey,
@@ -106,4 +124,20 @@ impl AccountState {
         4 +   // windows_harvested
         1 +   // bump
         32;   // reserved
+}
+
+impl Default for AccountState {
+    fn default() -> Self {
+        Self {
+            owner: Pubkey::default(),
+            tcp_balance: 0,
+            last_activity: 0,
+            hold_duration: 0,
+            phase_locks: 0,
+            tau_k: 0,
+            windows_harvested: 0,
+            bump: 0,
+            _reserved: [0u8; 32],
+        }
+    }
 }

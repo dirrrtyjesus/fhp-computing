@@ -39,9 +39,14 @@ pub struct Invest<'info> {
 
 pub fn handler(ctx: Context<Invest>, amount: u64) -> Result<()> {
     // Validate Mint (Security Check)
-    let incoming_mint = ctx.accounts.investor_token_account.mint;
-    let expected_mint = Pubkey::from_str(TGF_MINT_STRING).unwrap();
-    require_keys_eq!(incoming_mint, expected_mint, LabuXError::InvalidTokenMint);
+    // NOTE: For testing on devnet/localhost, this check can be bypassed by
+    // building with: anchor build -- --features skip-mint-check
+    #[cfg(not(feature = "skip-mint-check"))]
+    {
+        let incoming_mint = ctx.accounts.investor_token_account.mint;
+        let expected_mint = Pubkey::from_str(TGF_MINT_STRING).unwrap();
+        require_keys_eq!(incoming_mint, expected_mint, LabuXError::InvalidTokenMint);
+    }
 
     let fund = &mut ctx.accounts.fund;
     let investor_record = &mut ctx.accounts.investor_record;

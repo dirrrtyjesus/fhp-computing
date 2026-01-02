@@ -78,15 +78,20 @@ pub mod labux {
 
     // --- Genesis Fund (PTO²) Instructions ---
 
+    /// Initialize the Temporal Genesis Fund (PTO²)
+    /// Must be called once before any other Genesis Fund operations
+    pub fn initialize_genesis_fund(ctx: Context<InitializeGenesisFund>) -> Result<()> {
+        genesis::initialize::handler(ctx)
+    }
+
     /// Invest in the Temporal Genesis Fund
     pub fn invest_infall(
         ctx: Context<Invest>,
         amount: u64,
     ) -> Result<()> {
-        instructions::genesis::invest::handler(ctx, amount)
+        genesis::invest::handler(ctx, amount)
     }
 
-    /// Spawn a new Child PTO
     /// Spawn a new Child PTO
     pub fn spawn_child_pto(
         ctx: Context<SpawnChildPTO>,
@@ -94,7 +99,7 @@ pub mod labux {
         funding_goal: u64,
         coherence_mass: u64,
     ) -> Result<()> {
-        instructions::genesis::spawn::handler(ctx, sector, funding_goal, coherence_mass)
+        genesis::spawn::handler(ctx, sector, funding_goal, coherence_mass)
     }
 
     /// Emit Hawking Yields
@@ -102,6 +107,6 @@ pub mod labux {
         ctx: Context<EmitYield>,
         coherence_score: u16,
     ) -> Result<()> {
-        instructions::genesis::emit::handler(ctx, coherence_score)
+        genesis::emit::handler(ctx, coherence_score)
     }
 }

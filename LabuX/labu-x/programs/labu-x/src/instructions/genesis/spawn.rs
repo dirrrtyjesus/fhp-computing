@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, Transfer, Token, TokenAccount};
+use anchor_spl::token_interface::{self, TransferChecked, TokenAccount, TokenInterface, Mint};
 use crate::state::genesis_fund::*;
 use crate::errors::LabuXError;
 
@@ -30,12 +30,14 @@ pub struct SpawnChildPTO<'info> {
     pub creator: UncheckedAccount<'info>,
 
     #[account(mut)]
-    pub fund_vault: Account<'info, TokenAccount>,
+    pub fund_vault: InterfaceAccount<'info, TokenAccount>,
 
     #[account(mut)]
-    pub child_vault: Account<'info, TokenAccount>,
+    pub child_vault: InterfaceAccount<'info, TokenAccount>,
 
-    pub token_program: Program<'info, Token>,
+    pub mint: InterfaceAccount<'info, Mint>,
+
+    pub token_program: Interface<'info, TokenInterface>,
     pub system_program: Program<'info, System>,
 }
 
@@ -66,17 +68,18 @@ pub fn handler(
     let seeds = &[b"genesis_fund".as_ref(), &[fund.bump]];
     let signer = &[&seeds[..]];
 
-    let cpi_accounts = Transfer {
+    let cpi_accounts = TransferChecked {
         from: ctx.accounts.fund_vault.to_account_info(),
         to: ctx.accounts.child_vault.to_account_info(),
         authority: fund.to_account_info(),
+        mint: ctx.accounts.mint.to_account_info(),
     };
     let cpi_ctx = CpiContext::new_with_signer(
         ctx.accounts.token_program.to_account_info(),
         cpi_accounts,
         signer
     );
-    token::transfer(cpi_ctx, seed_capital)?;
+    token_interface::transfer_checked(cpi_ctx, seed_capital, ctx.accounts.mint.decimals)?;
 
     // 3. Initialize Child
     child.creator = ctx.accounts.creator.key();

@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, Transfer, Token, TokenAccount};
+use anchor_spl::token_interface::{self, TransferChecked, TokenAccount, TokenInterface, Mint};
 use crate::state::genesis_fund::*;
 
 use crate::constants::TGF_MINT_STRING;
@@ -28,12 +28,14 @@ pub struct Invest<'info> {
     pub investor_record: Account<'info, InvestorRecord>,
 
     #[account(mut)]
-    pub investor_token_account: Account<'info, TokenAccount>,
+    pub investor_token_account: InterfaceAccount<'info, TokenAccount>,
 
     #[account(mut)]
-    pub fund_vault: Account<'info, TokenAccount>,
+    pub fund_vault: InterfaceAccount<'info, TokenAccount>,
 
-    pub token_program: Program<'info, Token>,
+    pub mint: InterfaceAccount<'info, Mint>,
+
+    pub token_program: Interface<'info, TokenInterface>,
     pub system_program: Program<'info, System>,
 }
 
@@ -76,13 +78,14 @@ pub fn handler(ctx: Context<Invest>, amount: u64) -> Result<()> {
     investor_record.entry_mass = fund.total_mass;
 
     // 4. Transfer Tokens
-    let cpi_accounts = Transfer {
+    let cpi_accounts = TransferChecked {
         from: ctx.accounts.investor_token_account.to_account_info(),
         to: ctx.accounts.fund_vault.to_account_info(),
         authority: ctx.accounts.investor.to_account_info(),
+        mint: ctx.accounts.mint.to_account_info(),
     };
     let cpi_ctx = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
-    token::transfer(cpi_ctx, amount)?;
+    token_interface::transfer_checked(cpi_ctx, amount, ctx.accounts.mint.decimals)?;
 
     msg!("Genesis Infall: {} (Phase: {}°)", amount, phase);
     msg!("Core: {} | Alloc: {}", core_share, allocation_share);

@@ -28,6 +28,7 @@
 | **Token** | LIVE | [pump.fun](https://pump.fun/coin/2M7H4BKfaXduz1nvoLvtebei49qTLAjK7F4NPMM5pump) |
 | **Website** | LIVE | [temporalgenesisfund.lovable.app](https://temporalgenesisfund.lovable.app) |
 | **Telegram** | LIVE | [t.me/temporalgenesis](https://t.me/temporalgenesis) |
+| **X Thread** | LIVE | [Launch Thread](https://x.com/fearthewave_eth/status/2006878000072241619) |
 | **Images** | Generated | Grok + Gemini |
 
 ---

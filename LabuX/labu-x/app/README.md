@@ -19,6 +19,20 @@ npm install
 yarn install
 ```
 
+### Optional: Custom RPC Endpoint (Recommended)
+
+The free public RPC has rate limits. For better performance:
+
+1. Get a free RPC endpoint from:
+   - [Helius](https://www.helius.dev/) (Recommended)
+   - [QuickNode](https://www.quicknode.com/)
+   - [Alchemy](https://www.alchemy.com/)
+
+2. Create `.env.local`:
+```bash
+NEXT_PUBLIC_RPC_ENDPOINT=https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
+```
+
 ## Development
 
 ```bash

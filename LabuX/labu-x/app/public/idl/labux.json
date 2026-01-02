@@ -1,0 +1,694 @@
+{
+  "address": "6rivJsodwyZj7JbeJNeLD4F7K4tzxMq9mkEDkRxge7u5",
+  "metadata": {
+    "name": "labux",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "docs": [
+    "LabuX - The Harmonic Constraint Stablecoin",
+    "",
+    "Pegged to $1.00 (Earth/365) with TCP up to 1.096% (Tesla/369)",
+    "",
+    "The $1 peg is the EARTH HARMONIC - manifest economic reality.",
+    "The TCP ceiling is the TESLA HARMONIC - ideal coherent value.",
+    "The 4-cent gap is CREATIVE TENSION - the engine that makes it work."
+  ],
+  "instructions": [
+    {
+      "name": "emit_hawking_yield",
+      "docs": [
+        "Emit Hawking Yields"
+      ],
+      "discriminator": [
+        225,
+        0,
+        99,
+        123,
+        96,
+        32,
+        55,
+        3
+      ],
+      "accounts": [
+        {
+          "name": "investor",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "fund",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  101,
+                  110,
+                  101,
+                  115,
+                  105,
+                  115,
+                  95,
+                  102,
+                  117,
+                  110,
+                  100
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "investor_record",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  105,
+                  110,
+                  118,
+                  101,
+                  115,
+                  116,
+                  111,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "investor"
+              },
+              {
+                "kind": "account",
+                "path": "fund"
+              }
+            ]
+          }
+        },
+        {
+          "name": "fund_vault",
+          "writable": true
+        },
+        {
+          "name": "investor_token_account",
+          "writable": true
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": [
+        {
+          "name": "coherence_score",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "initialize_genesis_fund",
+      "docs": [
+        "Initialize the LabuX protocol",
+        "Mint LabuX with 1:1 collateral backing",
+        "Burn LabuX and receive collateral",
+        "Transfer LabuX with optional TCP",
+        "Accrue TCP for an account",
+        "Harvest TCP during harmonic window",
+        "Update account τₖ (oracle/governance)",
+        "Record phase lock event",
+        "Initialize the Temporal Genesis Fund (PTO²)",
+        "Must be called once before any other Genesis Fund operations"
+      ],
+      "discriminator": [
+        89,
+        42,
+        183,
+        2,
+        213,
+        201,
+        253,
+        88
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "fund",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  101,
+                  110,
+                  101,
+                  115,
+                  105,
+                  115,
+                  95,
+                  102,
+                  117,
+                  110,
+                  100
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "invest_infall",
+      "docs": [
+        "Invest in the Temporal Genesis Fund"
+      ],
+      "discriminator": [
+        81,
+        203,
+        121,
+        121,
+        92,
+        79,
+        33,
+        245
+      ],
+      "accounts": [
+        {
+          "name": "investor",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "fund",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  101,
+                  110,
+                  101,
+                  115,
+                  105,
+                  115,
+                  95,
+                  102,
+                  117,
+                  110,
+                  100
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "investor_record",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  105,
+                  110,
+                  118,
+                  101,
+                  115,
+                  116,
+                  111,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "investor"
+              },
+              {
+                "kind": "account",
+                "path": "fund"
+              }
+            ]
+          }
+        },
+        {
+          "name": "investor_token_account",
+          "writable": true
+        },
+        {
+          "name": "fund_vault",
+          "writable": true
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "spawn_child_pto",
+      "docs": [
+        "Spawn a new Child PTO"
+      ],
+      "discriminator": [
+        158,
+        231,
+        96,
+        199,
+        16,
+        72,
+        111,
+        69
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "fund"
+          ]
+        },
+        {
+          "name": "fund",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  101,
+                  110,
+                  101,
+                  115,
+                  105,
+                  115,
+                  95,
+                  102,
+                  117,
+                  110,
+                  100
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "child_pto",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  104,
+                  105,
+                  108,
+                  100,
+                  95,
+                  112,
+                  116,
+                  111
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "arg",
+                "path": "sector"
+              }
+            ]
+          }
+        },
+        {
+          "name": "creator"
+        },
+        {
+          "name": "fund_vault",
+          "writable": true
+        },
+        {
+          "name": "child_vault",
+          "writable": true
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "sector",
+          "type": {
+            "array": [
+              "u8",
+              16
+            ]
+          }
+        },
+        {
+          "name": "funding_goal",
+          "type": "u64"
+        },
+        {
+          "name": "coherence_mass",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "ChildPTO",
+      "discriminator": [
+        217,
+        48,
+        68,
+        188,
+        8,
+        16,
+        197,
+        103
+      ]
+    },
+    {
+      "name": "GenesisFund",
+      "discriminator": [
+        216,
+        157,
+        238,
+        116,
+        161,
+        132,
+        193,
+        58
+      ]
+    },
+    {
+      "name": "InvestorRecord",
+      "discriminator": [
+        170,
+        144,
+        39,
+        68,
+        178,
+        31,
+        194,
+        117
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InsufficientBasinDepth",
+      "msg": "Insufficient capital in Allocation Pool"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidTokenMint",
+      "msg": "Token Mint does not match Temporal Genesis Fund"
+    },
+    {
+      "code": 6002,
+      "name": "InsufficientCollateral",
+      "msg": "Insufficient collateral"
+    },
+    {
+      "code": 6003,
+      "name": "InvalidAmount",
+      "msg": "Invalid amount - must be greater than zero"
+    },
+    {
+      "code": 6004,
+      "name": "InvalidTauK",
+      "msg": "Invalid τₖ - must be between 3.0 and 9.0"
+    },
+    {
+      "code": 6005,
+      "name": "NotInHarmonicWindow",
+      "msg": "Not in harmonic window - harvest only available during windows"
+    },
+    {
+      "code": 6006,
+      "name": "NoTCPToHarvest",
+      "msg": "No TCP to harvest"
+    },
+    {
+      "code": 6007,
+      "name": "Unauthorized",
+      "msg": "Unauthorized"
+    },
+    {
+      "code": 6008,
+      "name": "ProtocolPaused",
+      "msg": "Protocol is paused"
+    },
+    {
+      "code": 6009,
+      "name": "MathOverflow",
+      "msg": "Math overflow"
+    },
+    {
+      "code": 6010,
+      "name": "MathUnderflow",
+      "msg": "Math underflow"
+    }
+  ],
+  "types": [
+    {
+      "name": "ChildPTO",
+      "docs": [
+        "A Child PTO spawned by the Genesis Fund"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "creator",
+            "docs": [
+              "The project creator"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "sector",
+            "docs": [
+              "The sector (e.g., \"DeFi\", \"AI\")"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                16
+              ]
+            }
+          },
+          {
+            "name": "funding_goal",
+            "docs": [
+              "Funding Goal (in USDC/LabuX)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "coherence_mass",
+            "docs": [
+              "Coherence Mass (τₖ × Clarity)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "seed_capital",
+            "docs": [
+              "Seed Capital received from Genesis Fund"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "emission_active",
+            "docs": [
+              "Is emission active?"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "coherence_score",
+            "docs": [
+              "Current coherence score (0-1000)"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "Bump seed"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GenesisFund",
+      "docs": [
+        "The Supermassive Temporal Attractor (PTO²)",
+        "",
+        "Funds and coordinates child PTOs via Golden Ratio logic."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "docs": [
+              "Authority (Core Council)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "core_treasury",
+            "docs": [
+              "Core Treasury Balance (61.8% of capital)",
+              "Used for stability, emergency liquidity, and yield buffering."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "allocation_pool",
+            "docs": [
+              "Allocation Pool Balance (38.2% of capital)",
+              "Used to seed new child PTOs."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "total_mass",
+            "docs": [
+              "Total Mass (Total Capital Infall)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "Bump seed"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InvestorRecord",
+      "docs": [
+        "Records an investment infall event with phase data"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "investor",
+            "docs": [
+              "The investor"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "docs": [
+              "Amount invested"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "phase",
+            "docs": [
+              "Phase angle (e.g., block slot % 360)"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "timestamp",
+            "docs": [
+              "Timestamp"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "claimed",
+            "docs": [
+              "Has yield been claimed?"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "entry_mass",
+            "docs": [
+              "Total ecosystem mass at time of entry (for Phase Tiers)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "Bump seed"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ],
+  "constants": [
+    {
+      "name": "TGF_MINT",
+      "docs": [
+        "The official Temporal Genesis Fund Mint (pump.fun)",
+        "CA: 2M7H4BKfaXduz1nvoLvtebei49qTLAjK7F4NPMM5pump"
+      ],
+      "type": "pubkey",
+      "value": "2Z9q2v1d4dDCCvoDkRTzxUrfdunmcKrsNCsmDG9HUoSo"
+    }
+  ]
+}

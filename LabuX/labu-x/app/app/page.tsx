@@ -84,10 +84,8 @@ export default function Home() {
         { commitment: 'confirmed' }
       );
 
-      // Load IDL
-      const idl = await Program.fetchIdl(PROGRAM_ID, provider);
-      if (!idl) throw new Error('IDL not found');
-
+      // Load IDL from local file
+      const idl = await fetch('/idl/labux.json').then(r => r.json());
       const program = new Program(idl, provider);
 
       const [fundPda] = PublicKey.findProgramAddressSync(

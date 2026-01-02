@@ -1,0 +1,8 @@
+#!/bin/bash
+args=()
+for arg in "$@"; do
+  if [ "$arg" != "build-bpf" ]; then
+    args+=("$arg")
+  fi
+done
+cargo build-sbf "${args[@]}"

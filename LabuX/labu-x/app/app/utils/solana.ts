@@ -1,55 +1,54 @@
 'use client';
 
-import { PublicKey } from '@solana/web3.js';
+import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 
-// Dynamically import to avoid SSR issues
-let splToken: any;
+// Token Program IDs
+export const TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
+export const TOKEN_2022_PROGRAM_ID = new PublicKey('TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb');
+export const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
 
-if (typeof window !== 'undefined') {
-  import('@solana/spl-token').then((module) => {
-    splToken = module;
-  });
-}
-
+// Manually calculate ATA address (avoids import issues)
 export async function getAssociatedTokenAddressAsync(
   mint: PublicKey,
   owner: PublicKey,
   allowOwnerOffCurve = false,
-  programId?: PublicKey
+  programId: PublicKey = TOKEN_2022_PROGRAM_ID
 ): Promise<PublicKey> {
-  if (!splToken) {
-    splToken = await import('@solana/spl-token');
-  }
-  return splToken.getAssociatedTokenAddress(
-    mint,
-    owner,
-    allowOwnerOffCurve,
-    programId
+  const [address] = await PublicKey.findProgramAddress(
+    [
+      owner.toBuffer(),
+      programId.toBuffer(),
+      mint.toBuffer(),
+    ],
+    ASSOCIATED_TOKEN_PROGRAM_ID
   );
+  return address;
 }
 
+// Manually create ATA instruction (avoids import issues)
 export async function createAssociatedTokenAccountInstructionAsync(
   payer: PublicKey,
   associatedToken: PublicKey,
   owner: PublicKey,
   mint: PublicKey,
-  programId?: PublicKey
-) {
-  if (!splToken) {
-    splToken = await import('@solana/spl-token');
-  }
-  return splToken.createAssociatedTokenAccountInstruction(
-    payer,
-    associatedToken,
-    owner,
-    mint,
-    programId
-  );
+  programId: PublicKey = TOKEN_2022_PROGRAM_ID
+): Promise<TransactionInstruction> {
+  const keys = [
+    { pubkey: payer, isSigner: true, isWritable: true },
+    { pubkey: associatedToken, isSigner: false, isWritable: true },
+    { pubkey: owner, isSigner: false, isWritable: false },
+    { pubkey: mint, isSigner: false, isWritable: false },
+    { pubkey: new PublicKey('11111111111111111111111111111111'), isSigner: false, isWritable: false }, // System Program
+    { pubkey: programId, isSigner: false, isWritable: false },
+  ];
+
+  return new TransactionInstruction({
+    keys,
+    programId: ASSOCIATED_TOKEN_PROGRAM_ID,
+    data: Buffer.from([]),
+  });
 }
 
 export async function getToken2022ProgramId() {
-  if (!splToken) {
-    splToken = await import('@solana/spl-token');
-  }
-  return splToken.TOKEN_2022_PROGRAM_ID;
+  return TOKEN_2022_PROGRAM_ID;
 }

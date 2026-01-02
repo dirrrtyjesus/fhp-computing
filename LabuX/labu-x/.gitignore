@@ -6,3 +6,23 @@ node_modules
 test-ledger
 .yarn
 **/check_errors.txt
+
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# Environment files (contains API keys)
+.env.local
+.env*.local
+
+# Screenshots and temp files
+*.png
+Screenshot*.png
+Cargo.lock
+package-lock.json
+
+# IDE
+.vscode/
+.idea/

@@ -14,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body suppressHydrationWarning>
         <WalletContextProvider>{children}</WalletContextProvider>
       </body>
     </html>

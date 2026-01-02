@@ -143,7 +143,7 @@ export default function Home() {
       const fundInfo = await connection.getAccountInfo(fundPda);
       if (!fundInfo) {
         setStatus({ type: 'info', message: 'Initializing Genesis Fund...' });
-        await program.methods
+        const initSig = await program.methods
           .initializeGenesisFund()
           .accounts({
             authority: wallet.publicKey,
@@ -151,6 +151,10 @@ export default function Home() {
             systemProgram: SystemProgram.programId,
           })
           .rpc();
+
+        // CRITICAL: Wait for confirmation before proceeding
+        await connection.confirmTransaction(initSig, 'confirmed');
+        setStatus({ type: 'info', message: 'Genesis Fund initialized. Preparing investment...' });
       }
 
       // Execute investment

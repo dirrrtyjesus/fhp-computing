@@ -29,7 +29,11 @@ async function main() {
     // 1. Setup Environment
     const provider = anchor.AnchorProvider.env();
     anchor.setProvider(provider);
-    const program: any = anchor.workspace.LabuX;
+
+    // Load program - Fallback to manual IDL loading for reliability
+    const idl = require("../target/idl/labux.json");
+    const programId = new PublicKey("6rivJsodwyZj7JbeJNeLD4F7K4tzxMq9mkEDkRxge7u5");
+    const program = new Program(idl, provider);
 
     console.log("🚀 Starting Genesis Ignition Sequence...");
     console.log("RPC Endpoint:", provider.connection.rpcEndpoint);
@@ -70,7 +74,7 @@ async function main() {
                     lamports,
                     programId: TOKEN_PROGRAM_ID,
                 }),
-                anchor.spl.token.createInitializeMintInstruction(
+                createInitializeMintInstruction(
                     mintKeypair.publicKey,
                     6,
                     provider.wallet.publicKey,
@@ -87,7 +91,7 @@ async function main() {
                 createAssociatedTokenAccountInstruction(
                     provider.wallet.publicKey, walletAta, provider.wallet.publicKey, mintToUse
                 ),
-                anchor.spl.token.createMintToInstruction(
+                createMintToInstruction(
                     mintToUse, walletAta, provider.wallet.publicKey, IGNITION_AMOUNT.toNumber() * 2 // Mint extra just in case
                 )
             );

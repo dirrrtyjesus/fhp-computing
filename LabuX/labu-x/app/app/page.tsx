@@ -5,9 +5,11 @@ import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
 import { Program, AnchorProvider, web3, BN } from '@coral-xyz/anchor';
-import * as splToken from '@solana/spl-token';
-
-const { getAssociatedTokenAddress, TOKEN_2022_PROGRAM_ID, createAssociatedTokenAccountInstruction } = splToken;
+import {
+  getAssociatedTokenAddressAsync,
+  createAssociatedTokenAccountInstructionAsync,
+  getToken2022ProgramId
+} from './utils/solana';
 
 const TGF_MINT = new PublicKey('2M7H4BKfaXduz1nvoLvtebei49qTLAjK7F4NPMM5pump');
 const PROGRAM_ID = new PublicKey('6rivJsodwyZj7JbeJNeLD4F7K4tzxMq9mkEDkRxge7u5');
@@ -57,7 +59,8 @@ export default function Home() {
   const loadTGFBalance = async () => {
     if (!wallet.publicKey) return;
     try {
-      const ata = await getAssociatedTokenAddress(
+      const TOKEN_2022_PROGRAM_ID = await getToken2022ProgramId();
+      const ata = await getAssociatedTokenAddressAsync(
         TGF_MINT,
         wallet.publicKey,
         false,
@@ -104,14 +107,16 @@ export default function Home() {
         PROGRAM_ID
       );
 
-      const fundVault = await getAssociatedTokenAddress(
+      const TOKEN_2022_PROGRAM_ID = await getToken2022ProgramId();
+
+      const fundVault = await getAssociatedTokenAddressAsync(
         TGF_MINT,
         fundPda,
         true,
         TOKEN_2022_PROGRAM_ID
       );
 
-      const walletAta = await getAssociatedTokenAddress(
+      const walletAta = await getAssociatedTokenAddressAsync(
         TGF_MINT,
         wallet.publicKey,
         false,
@@ -122,7 +127,7 @@ export default function Home() {
       const vaultInfo = await connection.getAccountInfo(fundVault);
       if (!vaultInfo) {
         setStatus({ type: 'info', message: 'Creating fund vault...' });
-        const createAtaIx = createAssociatedTokenAccountInstruction(
+        const createAtaIx = await createAssociatedTokenAccountInstructionAsync(
           wallet.publicKey,
           fundVault,
           fundPda,

@@ -81,12 +81,12 @@ def create_text_overlays(themes, duration, theme='cosmic'):
     """Generate FFmpeg drawtext filters for theme overlays"""
     filters = []
 
-    # Title card at start
+    # Title card at start (simplified - no emoji, proper escaping)
     title_color = 'white' if theme == 'cosmic' else 'white'
     filters.append(
-        f"drawtext=text='🌌 Harmonic Video':"
+        f"drawtext=text='Harmonic Video':"
         f"fontsize=80:fontcolor={title_color}:x=(w-text_w)/2:y=(h-text_h)/2-100:"
-        f"enable='between(t,0,3)':alpha='if(lt(t,0.5),t/0.5,if(gt(t,2.5),(3-t)/0.5,1))'"
+        f"enable='between(t,0,3)'"
     )
 
     # Theme overlays
@@ -94,24 +94,26 @@ def create_text_overlays(themes, duration, theme='cosmic'):
         start = t['start']
         end = start + t['duration']
 
-        # Theme name
+        # Theme name - escape single quotes properly
+        theme_name = t['name'].replace("'", "\\'")
         filters.append(
-            f"drawtext=text='{t['name']}':"
-            f"fontsize=60:fontcolor=#a78bfa:x=(w-text_w)/2:y=100:"
-            f"enable='between(t,{start},{end})':alpha='if(lt(t,{start+0.5}),(t-{start})/0.5,if(gt(t,{end-0.5}),({end}-t)/0.5,1))'"
+            f"drawtext=text='{theme_name}':"
+            f"fontsize=60:fontcolor=white:x=(w-text_w)/2:y=100:"
+            f"enable='between(t,{start},{end})'"
         )
 
         # Theme vibe
+        theme_vibe = t['vibe'].replace("'", "\\'")
         filters.append(
-            f"drawtext=text='{t['vibe']}':"
-            f"fontsize=30:fontcolor=#9ca3af:x=(w-text_w)/2:y=180:"
-            f"enable='between(t,{start},{end})':alpha='if(lt(t,{start+0.5}),(t-{start})/0.5,if(gt(t,{end-0.5}),({end}-t)/0.5,1))'"
+            f"drawtext=text='{theme_vibe}':"
+            f"fontsize=30:fontcolor=gray:x=(w-text_w)/2:y=180:"
+            f"enable='between(t,{start},{end})'"
         )
 
     # Watermark
     filters.append(
-        f"drawtext=text='Made with Harmonic Composer | Genesis Fund':"
-        f"fontsize=20:fontcolor=#666666:x=(w-text_w)/2:y=h-40"
+        f"drawtext=text='Made with Harmonic Composer':"
+        f"fontsize=20:fontcolor=gray:x=(w-text_w)/2:y=h-40"
     )
 
     return ','.join(filters)
@@ -167,15 +169,12 @@ def generate_video(audio_path, output_path, theme='cosmic'):
         'ffmpeg',
         '-i', temp_bg,
         '-i', audio_path,
-        '-filter_complex', text_filter,
-        '-map', '0:v',
-        '-map', '1:a',
+        '-vf', text_filter,  # Use -vf instead of -filter_complex for single video input
         '-c:v', 'libx264',
         '-preset', 'medium',
         '-crf', '23',
         '-pix_fmt', 'yuv420p',
-        '-c:a', 'aac',
-        '-b:a', '192k',
+        '-c:a', 'copy',  # Copy audio instead of re-encoding
         '-shortest',
         '-y',
         output_path

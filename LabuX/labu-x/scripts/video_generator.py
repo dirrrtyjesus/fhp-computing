@@ -131,19 +131,45 @@ def generate_video(audio_path, output_path, theme='cosmic'):
     # Create video with FFmpeg
     width, height = 1920, 1080
 
-    # Build filter complex
-    gradient_filter = create_cosmic_gradient(width, height, theme)
-    text_filter = create_text_overlays(themes, duration, theme)
+    # Step 1: Create background video with correct duration
+    temp_bg = output_path.replace('.mp4', '_bg.mp4')
 
-    filter_complex = f"{gradient_filter},{text_filter}"
+    # Choose background colors based on theme
+    if theme == 'cosmic':
+        color1, color2 = '0x1a1a2e', '0x2575fc'
+    else:
+        color1, color2 = '0x0f0f0f', '0x1f1f1f'
 
-    # FFmpeg command
-    cmd = [
+    # Create gradient background for full duration
+    bg_cmd = [
         'ffmpeg',
         '-f', 'lavfi',
-        '-i', filter_complex,
+        '-i', f'color=c={color1}:s={width}x{height}:d={duration},format=yuv420p',
+        '-vf', f'drawbox=x=0:y=ih/2:w={width}:h={height}/2:color={color2}@0.6:t=fill',
+        '-c:v', 'libx264',
+        '-preset', 'ultrafast',
+        '-y',
+        temp_bg
+    ]
+
+    print("⚡ Creating background...")
+    result = subprocess.run(bg_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+    if result.returncode != 0:
+        print(f"❌ Background creation error:\n{result.stderr}")
+        raise Exception("Background creation failed")
+
+    # Step 2: Add text overlays
+    text_filter = create_text_overlays(themes, duration, theme)
+
+    # Step 3: Combine background, text overlays, and audio
+    final_cmd = [
+        'ffmpeg',
+        '-i', temp_bg,
         '-i', audio_path,
-        '-t', str(duration),
+        '-filter_complex', text_filter,
+        '-map', '0:v',
+        '-map', '1:a',
         '-c:v', 'libx264',
         '-preset', 'medium',
         '-crf', '23',
@@ -155,15 +181,17 @@ def generate_video(audio_path, output_path, theme='cosmic'):
         output_path
     ]
 
-    print("⚡ Rendering video...")
-    print(f"   Command: {' '.join(cmd[:10])}...")
-
+    print("⚡ Adding text overlays and audio...")
     result = subprocess.run(
-        cmd,
+        final_cmd,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True
     )
+
+    # Cleanup temp background
+    if os.path.exists(temp_bg):
+        os.unlink(temp_bg)
 
     if result.returncode != 0:
         print(f"❌ FFmpeg error:\n{result.stderr}")

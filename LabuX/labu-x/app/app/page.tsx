@@ -209,6 +209,20 @@ export default function Home() {
       <div className="header">
         <h1 className="title">Genesis Fund</h1>
         <p className="subtitle">The Supermassive Temporal Attractor (PTO²)</p>
+        <div style={{ marginTop: '1rem' }}>
+          <a
+            href="/philosophy"
+            style={{
+              color: '#8b5cf6',
+              textDecoration: 'none',
+              fontSize: '0.95rem',
+              borderBottom: '1px solid #8b5cf6',
+              paddingBottom: '2px'
+            }}
+          >
+            Understand the Mechanism →
+          </a>
+        </div>
       </div>
 
       {/* Cosmic Event Banner */}

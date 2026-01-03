@@ -37,3 +37,4 @@ export function WalletContextProvider({ children }: { children: React.ReactNode 
     </ConnectionProvider>
   );
 }
+// RPC endpoint configured

@@ -72,13 +72,14 @@ export async function POST(request: NextRequest) {
 
 function generateVideo(audioPath: string, outputPath: string, theme: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    const scriptPath = join(process.cwd(), '..', 'scripts', 'video_generator_augmntd.py');
+    const scriptPath = join(process.cwd(), '..', 'scripts', 'video_generator_harmonic.py');
 
-    console.log(`🌌 Starting augmntd video generation...`);
+    console.log(`🔮 Starting HARMONIC augmntd diffusion generation...`);
     console.log(`   Audio: ${audioPath}`);
     console.log(`   Output: ${outputPath}`);
     console.log(`   Theme: ${theme}`);
     console.log(`   Script: ${scriptPath}`);
+    console.log(`   🎯 Harmonic analysis will drive visuals`);
 
     const pythonProcess = spawn('python3', [
       scriptPath,

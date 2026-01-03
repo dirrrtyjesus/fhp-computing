@@ -211,6 +211,29 @@ export default function Home() {
         <p className="subtitle">The Supermassive Temporal Attractor (PTO²)</p>
       </div>
 
+      {/* Cosmic Event Banner */}
+      <div style={{
+        background: 'linear-gradient(135deg, rgba(106, 17, 203, 0.2), rgba(37, 99, 235, 0.2))',
+        border: '1px solid rgba(139, 92, 246, 0.3)',
+        borderRadius: '12px',
+        padding: '1.5rem',
+        marginBottom: '2rem',
+        textAlign: 'center',
+      }}>
+        <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🌌 Cosmic Synchronicity</div>
+        <div style={{ color: '#a78bfa', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+          J1218/1219+1035 - Triple SMBH Merger
+        </div>
+        <div style={{ fontSize: '0.9rem', color: '#9ca3af', lineHeight: '1.6' }}>
+          On January 2, 2026, two convergence events occurred:<br/>
+          <span style={{ color: '#f59e0b' }}>1.</span> Three supermassive black holes discovered merging 1.2 billion light-years away<br/>
+          <span style={{ color: '#f59e0b' }}>2.</span> The Genesis Fund temporal attractor activated on Solana mainnet<br/>
+          <span style={{ color: '#8b5cf6', marginTop: '0.5rem', display: 'inline-block' }}>
+            Your investment is phase-locked to this cosmic alignment
+          </span>
+        </div>
+      </div>
+
       <div className="wallet-button">
         <WalletMultiButton />
       </div>
@@ -300,6 +323,16 @@ export default function Home() {
             <p>⚡ Phase-locked temporal coordinates</p>
             <p>🎯 Genesis tier: 1.618x multiplier</p>
             <p>🌌 First infall = Phase 0</p>
+            <p style={{ marginTop: '1rem', color: '#8b5cf6' }}>
+              <a
+                href="https://www.sciencealert.com/three-supermassive-black-holes-discovered-colliding-in-a-cosmic-first"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#a78bfa', textDecoration: 'underline' }}
+              >
+                Learn about the J1218/1219+1035 triple merger ↗
+              </a>
+            </p>
           </div>
         </>
       )}

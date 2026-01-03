@@ -15,9 +15,11 @@ export function WalletContextProvider({ children }: { children: React.ReactNode 
   const endpoint = useMemo(() => {
     // Check for custom RPC in env
     if (process.env.NEXT_PUBLIC_RPC_ENDPOINT) {
+      console.log('✅ Using custom RPC:', process.env.NEXT_PUBLIC_RPC_ENDPOINT.substring(0, 50) + '...');
       return process.env.NEXT_PUBLIC_RPC_ENDPOINT;
     }
     // Fallback to public endpoint (has rate limits)
+    console.log('⚠️ No custom RPC found, using public endpoint (will hit rate limits)');
     return 'https://api.mainnet-beta.solana.com';
   }, []);
 
@@ -37,3 +39,4 @@ export function WalletContextProvider({ children }: { children: React.ReactNode 
     </ConnectionProvider>
   );
 }
+// RPC endpoint configured

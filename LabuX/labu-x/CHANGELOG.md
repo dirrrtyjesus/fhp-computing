@@ -175,11 +175,11 @@ On January 2, 2026, two convergence events occurred:
 - Program ID: `6rivJsodwyZj7JbeJNeLD4F7K4tzxMq9mkEDkRxge7u5`
 - Genesis Fund PDA: `96FoBvWbtCCxPRGSwnFer5ZMUQSxyREAPkBBHUD42XhP`
 
-**Treasury Status:**
-- Total Mass: 1,000,000 $TGF
-- Core Treasury: 618,033.99 $TGF
-- Allocation Pool: 381,966.01 $TGF
-- Active Investors: 1 (Genesis Tier)
+**Treasury Status (Updated 2026-01-06):**
+- Total Mass: **29,140,088.99 $TGF** (~29.14M)
+- Basin Address: `96FoBvWbtCCxPRGSwnFer5ZMUQSxyREAPkBBHUD42XhP`
+- SOL Balance: 0.00134328 SOL
+- Status: Seeded and operational
 
 **Token Information:**
 - Token: $TGF (Temporal Genesis Fund)
@@ -200,8 +200,8 @@ On January 2, 2026, two convergence events occurred:
 **Genesis Tier (ACTIVE):**
 - Range: 0 - 10M $TGF total_mass
 - Multiplier: 1.618x
-- Current: 1M $TGF locked
-- Remaining: 9M $TGF available
+- Current: 29.14M $TGF in basin
+- Status: **GENESIS TIER FILLED** - now in Pioneer tier range
 
 **Future Tiers:**
 - Pioneer: 10M - 50M (1.414x)

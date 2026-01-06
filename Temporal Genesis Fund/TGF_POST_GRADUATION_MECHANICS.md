@@ -4,6 +4,29 @@
 
 ---
 
+## LIVE STATUS
+
+**$TGF is LIVE on pump.fun** - Launched January 1, 2025
+
+| Metric | Value |
+|--------|-------|
+| Token | Temporal Genesis Fund ($$TGF) |
+| Contract | `2M7H4BKfaXduz1nvoLvtebei49qTLAjK7F4NPMM5pump` |
+| pump.fun | [pump.fun/coin/2M7H4BKfaXduz1nvoLvtebei49qTLAjK7F4NPMM5pump](https://pump.fun/coin/2M7H4BKfaXduz1nvoLvtebei49qTLAjK7F4NPMM5pump) |
+| Total Supply | 1,000,000,000,000,000 |
+
+### Basin (Treasury) - Seeded
+
+| Address | `96FoBvWbtCCxPRGSwnFer5ZMUQSxyREAPkBBHUD42XhP` |
+|---------|------------------------------------------------|
+| $TGF Balance | **29,140,088.99** |
+| SOL Balance | 0.00134328 |
+| Solscan | [View Basin](https://solscan.io/account/96FoBvWbtCCxPRGSwnFer5ZMUQSxyREAPkBBHUD42XhP) |
+
+The basin is seeded and ready. Post-graduation, this treasury will enforce the 61.8%/38.2% split automatically.
+
+---
+
 ## The Graduation Event
 
 **Trigger:** $69,000 market cap on pump.fun bonding curve

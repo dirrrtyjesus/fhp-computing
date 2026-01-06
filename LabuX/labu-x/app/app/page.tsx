@@ -22,10 +22,14 @@ const PROGRAM_ID = new PublicKey('6rivJsodwyZj7JbeJNeLD4F7K4tzxMq9mkEDkRxge7u5')
 const BASIN_PDA = new PublicKey('96FoBvWbtCCxPRGSwnFer5ZMUQSxyREAPkBBHUD42XhP');
 const PHI_INV = 0.618;
 
-type AssetType = 'TGF' | 'USDC' | 'TAO';
+// RPC Endpoints
+const SOLANA_RPC = process.env.NEXT_PUBLIC_RPC_ENDPOINT || 'https://api.mainnet-beta.solana.com';
+const X1_RPC = 'https://rpc.mainnet.x1.xyz';
+
+type AssetType = 'TGF' | 'USDC' | 'TAO' | 'XNT';
 
 interface AssetConfig {
-  mint: PublicKey;
+  mint: PublicKey | null; // null for native assets like XNT
   decimals: number;
   symbol: string;
   name: string;
@@ -33,6 +37,10 @@ interface AssetConfig {
   weight: string;
   useToken2022: boolean;
   color: string;
+  rpc?: string; // Custom RPC for cross-chain assets
+  isNative?: boolean; // True for native chain tokens (XNT on X1)
+  chain?: string; // Chain identifier
+  explorer?: string; // Block explorer URL
 }
 
 const ASSETS: Record<AssetType, AssetConfig> = {
@@ -45,6 +53,7 @@ const ASSETS: Record<AssetType, AssetConfig> = {
     weight: '1.0x',
     useToken2022: true,
     color: '#f39c12',
+    chain: 'Solana',
   },
   USDC: {
     mint: USDC_MINT,
@@ -55,6 +64,21 @@ const ASSETS: Record<AssetType, AssetConfig> = {
     weight: '1.0x',
     useToken2022: false,
     color: '#2775ca',
+    chain: 'Solana',
+  },
+  XNT: {
+    mint: null, // Native token on X1
+    decimals: 18,
+    symbol: 'XNT',
+    name: 'X1 Native Token',
+    harmonic: '369 (Tesla)',
+    weight: '1.369x',
+    useToken2022: false,
+    color: '#9333ea',
+    rpc: X1_RPC,
+    isNative: true,
+    chain: 'X1',
+    explorer: 'https://explorer.mainnet.x1.xyz',
   },
   TAO: {
     mint: WTAO_MINT,
@@ -65,6 +89,7 @@ const ASSETS: Record<AssetType, AssetConfig> = {
     weight: '1.272x',
     useToken2022: false,
     color: '#00d4aa',
+    chain: 'Solana',
   },
 };
 
@@ -79,6 +104,7 @@ export default function Home() {
   const [balances, setBalances] = useState<Record<AssetType, number | null>>({
     TGF: null,
     USDC: null,
+    XNT: null,
     TAO: null,
   });
 
@@ -117,6 +143,20 @@ export default function Home() {
 
     for (const [assetType, config] of Object.entries(ASSETS) as [AssetType, AssetConfig][]) {
       try {
+        // Handle XNT (native token on X1 chain)
+        if (config.isNative && config.rpc) {
+          const x1Connection = new web3.Connection(config.rpc, 'confirmed');
+          const balance = await x1Connection.getBalance(wallet.publicKey);
+          setBalances(prev => ({ ...prev, [assetType]: balance / Math.pow(10, config.decimals) }));
+          continue;
+        }
+
+        // Handle SPL tokens on Solana
+        if (!config.mint) {
+          setBalances(prev => ({ ...prev, [assetType]: 0 }));
+          continue;
+        }
+
         const programId = config.useToken2022 ? await getToken2022ProgramId() : TOKEN_PROGRAM_ID;
         const ata = await getAssociatedTokenAddressAsync(
           config.mint,
@@ -341,11 +381,73 @@ export default function Home() {
     }
   };
 
+  const handleXNTDeposit = async () => {
+    if (!wallet.publicKey || !wallet.signTransaction) {
+      setStatus({ type: 'error', message: 'Please connect your wallet' });
+      return;
+    }
+
+    const config = ASSETS.XNT;
+    setLoading(true);
+    setStatus({ type: 'info', message: 'Switching to X1 network...' });
+
+    try {
+      // Create connection to X1 chain
+      const x1Connection = new web3.Connection(X1_RPC, 'confirmed');
+
+      const depositAmount = parseFloat(amount) * Math.pow(10, config.decimals);
+
+      setStatus({ type: 'info', message: 'Preparing XNT transfer on X1 chain...' });
+
+      // Create native transfer instruction (XNT is native on X1, like SOL on Solana)
+      const transaction = new Transaction().add(
+        web3.SystemProgram.transfer({
+          fromPubkey: wallet.publicKey,
+          toPubkey: BASIN_PDA, // Same address works on X1 (SVM compatible)
+          lamports: Math.floor(depositAmount),
+        })
+      );
+
+      // Get recent blockhash from X1
+      const { blockhash } = await x1Connection.getLatestBlockhash();
+      transaction.recentBlockhash = blockhash;
+      transaction.feePayer = wallet.publicKey;
+
+      setStatus({ type: 'info', message: 'Executing XNT infall on X1...' });
+
+      // Sign and send on X1
+      const signed = await wallet.signTransaction(transaction);
+      const signature = await x1Connection.sendRawTransaction(signed.serialize());
+      await x1Connection.confirmTransaction(signature, 'confirmed');
+
+      setStatus({
+        type: 'success',
+        message: `✅ ${amount} XNT deposited on X1! TX: ${signature.slice(0, 8)}...`,
+      });
+
+      setTimeout(() => {
+        setStatus({
+          type: 'success',
+          message: `🜏 XNT infall complete | Harmonic: 369 (Tesla) | Weight: 1.369x | Chain: X1`,
+        });
+      }, 3000);
+
+      loadAllBalances();
+    } catch (error: any) {
+      console.error('XNT deposit error:', error);
+      setStatus({ type: 'error', message: error.message || 'X1 transaction failed' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleInvest = async () => {
     if (selectedAsset === 'TGF') {
       await handleTGFInvest();
+    } else if (selectedAsset === 'XNT') {
+      await handleXNTDeposit();
     } else {
-      await handleDirectDeposit(selectedAsset);
+      await handleDirectDeposit(selectedAsset as 'USDC' | 'TAO');
     }
   };
 
@@ -378,7 +480,7 @@ export default function Home() {
           Multi-Asset Direct Deposits — No Swap Required
         </div>
         <div style={{ fontSize: '0.85rem', color: '#9ca3af', lineHeight: '1.6' }}>
-          <span style={{ color: '#f39c12' }}>$TGF</span> (φ) • <span style={{ color: '#2775ca' }}>USDC</span> (365) • <span style={{ color: '#00d4aa' }}>wTAO</span> (936)
+          <span style={{ color: '#f39c12' }}>$TGF</span> (φ) • <span style={{ color: '#2775ca' }}>USDC</span> (365) • <span style={{ color: '#9333ea' }}>XNT</span> (369) • <span style={{ color: '#00d4aa' }}>wTAO</span> (936)
         </div>
       </div>
 
@@ -484,9 +586,30 @@ export default function Home() {
                   <span style={{ color: currentAsset.color }}>{currentAsset.weight}</span>
                 </div>
               </div>
-              {selectedAsset !== 'TGF' && (
+              {currentAsset.chain && (
+                <div style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>
+                  <span style={{ color: '#888' }}>Chain: </span>
+                  <span style={{ color: currentAsset.color }}>{currentAsset.chain}</span>
+                  {currentAsset.explorer && (
+                    <a
+                      href={currentAsset.explorer}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ marginLeft: '0.5rem', color: '#a78bfa', fontSize: '0.8rem' }}
+                    >
+                      Explorer ↗
+                    </a>
+                  )}
+                </div>
+              )}
+              {selectedAsset !== 'TGF' && selectedAsset !== 'XNT' && (
                 <div style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: '#9ca3af' }}>
                   ⚡ Direct deposit — no swap fees, no slippage
+                </div>
+              )}
+              {selectedAsset === 'XNT' && (
+                <div style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: '#9333ea' }}>
+                  🜏 Cross-chain infall — deposits on X1, wrappable to Solana
                 </div>
               )}
             </div>
@@ -542,7 +665,7 @@ export default function Home() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                   <span>Deposit to Basin:</span>
                   <span style={{ color: currentAsset.color, fontWeight: 'bold' }}>
-                    {parseFloat(amount || '0').toFixed(2)} {currentAsset.symbol}
+                    {parseFloat(amount || '0').toFixed(selectedAsset === 'XNT' ? 6 : 2)} {currentAsset.symbol}
                   </span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -551,9 +674,22 @@ export default function Home() {
                     {currentAsset.weight}
                   </span>
                 </div>
+                {selectedAsset === 'XNT' && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem' }}>
+                    <span>Target Chain:</span>
+                    <span style={{ color: currentAsset.color, fontWeight: 'bold' }}>
+                      X1 Mainnet
+                    </span>
+                  </div>
+                )}
                 {selectedAsset === 'TAO' && (
                   <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#00d4aa' }}>
                     🧠 Intelligence premium: miners get up to 1.272x
+                  </div>
+                )}
+                {selectedAsset === 'XNT' && (
+                  <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#9333ea' }}>
+                    🜏 Tesla resonance: 3-6-9 the key to the universe
                   </div>
                 )}
               </div>
@@ -570,12 +706,14 @@ export default function Home() {
               {loading ? (
                 <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
                   <span className="loading"></span>
-                  Processing...
+                  {selectedAsset === 'XNT' ? 'Connecting to X1...' : 'Processing...'}
                 </span>
               ) : (
                 selectedAsset === 'TGF'
                   ? 'Ignite Genesis Infall'
-                  : `Deposit ${currentAsset.symbol} to Basin`
+                  : selectedAsset === 'XNT'
+                    ? 'Deposit XNT on X1 Chain'
+                    : `Deposit ${currentAsset.symbol} to Basin`
               )}
             </button>
 
@@ -589,7 +727,8 @@ export default function Home() {
           <div style={{ textAlign: 'center', marginTop: '2rem', color: '#666', fontSize: '0.9rem' }}>
             <p>⚡ Phase-locked temporal coordinates</p>
             <p>🎯 Genesis tier: 1.618x multiplier</p>
-            <p>🌌 Multi-asset basin: USDC + TAO + $TGF</p>
+            <p>🌌 Cross-chain basin: $TGF + USDC + XNT + wTAO</p>
+            <p>🜏 Solana + X1 harmonics unified</p>
             <p style={{ marginTop: '1rem' }}>
               <a href="/augmntd-pathways" style={{ color: '#a78bfa', textDecoration: 'underline' }}>
                 Learn about Augmntd Pathways →
@@ -605,7 +744,10 @@ export default function Home() {
             Connect Your Wallet
           </h2>
           <p style={{ color: '#888', fontSize: '1.1rem' }}>
-            Connect to deposit $TGF, USDC, or wTAO directly to the basin
+            Connect to deposit $TGF, USDC, XNT, or wTAO to the basin
+          </p>
+          <p style={{ color: '#666', fontSize: '0.9rem', marginTop: '0.5rem' }}>
+            Cross-chain: Solana + X1
           </p>
         </div>
       )}

@@ -1,30 +1,37 @@
-# Augmntd Pathways: USDC and TAO Basin Integration
+# Augmntd Pathways: Cross-Chain Basin Integration
 
-> Direct multi-asset inflows - no swap required
+> Direct multi-asset inflows across Solana + X1 — no swap required
 
 ---
 
-## The Multi-Asset Xenial Basin
+## The Cross-Chain Xenial Basin
 
 The $TGF basin operates as a **supermassive economic attractor** - welcoming the unknown (xenial embrace), compressing value through coherence, and spawning child entities.
 
-**Augmntd pathways accept assets directly** - USDC and TAO deposit natively without conversion, preserving their unique harmonic properties while contributing to unified basin coherence.
+**Augmntd pathways accept assets directly** across multiple chains:
+- **Solana**: $TGF, USDC, wTAO
+- **X1**: XNT (native)
+
+Each asset preserves its unique harmonic properties while contributing to unified basin coherence.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                    CAPITAL-TIME PHASE SPACE                     │
 │                                                                 │
-│     USDC ════════╗         ╔════════ TAO                       │
-│    (Stability)   ║         ║   (Intelligence)                  │
-│        │         ║         ║         │                         │
+│  SOLANA CHAIN                           X1 CHAIN                │
+│  ═══════════                            ════════                │
+│                                                                 │
+│     USDC ════════╗         ╔════════ XNT                       │
+│    (365)         ║         ║        (369)                      │
 │        │      ╔══╩═════════╩══╗      │                         │
 │        │      ║               ║      │                         │
-│        └─────►║  MULTI-ASSET  ║◄─────┘                         │
+│        └─────►║  CROSS-CHAIN  ║◄─────┘                         │
 │               ║     BASIN     ║                                 │
 │        ┌─────►║               ║◄─────┐                         │
 │        │      ╚═══════════════╝      │                         │
 │        │              │              │                         │
-│       $TGF           SOL          (future)                     │
+│       $TGF          wTAO           SOL                         │
+│      (φ)           (936)           (∞)                         │
 │                       │                                         │
 │              ┌────────┴────────┐                                │
 │              ▼                 ▼                                │
@@ -35,12 +42,27 @@ The $TGF basin operates as a **supermassive economic attractor** - welcoming the
 
 ### Basin Asset Composition
 
-| Asset | Harmonic | Role | Weight Formula |
-|-------|----------|------|----------------|
-| $TGF | φ (1.618) | Native governance + yield | 1.0x base |
-| USDC | 365 (Earth) | Stability anchor | 1.0x stable |
-| TAO | 936 (Intelligence) | AI-backed value | 1.272x intelligence premium |
-| SOL | ∞ (Native) | Gas + liquidity | 0.8x (volatile discount) |
+| Asset | Harmonic | Chain | Role | Weight |
+|-------|----------|-------|------|--------|
+| $TGF | φ (1.618) | Solana | Native governance + yield | 1.0x |
+| USDC | 365 (Earth) | Solana | Stability anchor | 1.0x |
+| XNT | 369 (Tesla) | **X1** | Resonance bridge | **1.369x** |
+| wTAO | 936 (Intelligence) | Solana | AI-backed value | 1.272x |
+| SOL | ∞ (Native) | Solana | Gas + liquidity | 0.8x |
+
+### Harmonic Frequency Map
+
+```
+φ (1.618) ──── $TGF ──── Golden ratio governance
+    │
+  365 ──────── USDC ──── Earth/annual cycle (stability)
+    │
+  369 ──────── XNT ───── Tesla resonance (3-6-9)
+    │
+  936 ──────── wTAO ──── Intelligence frequency (936 Hz)
+```
+
+**"If you only knew the magnificence of 3, 6, and 9, you would have the key to the universe."** — Nikola Tesla
 
 ---
 
@@ -349,32 +371,169 @@ TAO inflows receive bonus multipliers based on provable source:
 
 ---
 
-## Multi-Asset Basin Architecture
+## Pathway 3: XNT (The Tesla Harmonic)
 
-When both pathways are active, the basin holds **native multi-asset reserves**:
+**XNT represents the 369 frequency** — Nikola Tesla's key to the universe. The resonance bridge between stability (365) and intelligence (936).
+
+### X1 Chain Overview
+
+X1 is an **SVM-compatible Layer 1 blockchain** focused on freedom to transact:
+- Mainnet launched October 2025
+- Solana Virtual Machine compatible
+- ~$5/day validator participation (lowest cost network)
+- Same address structure as Solana
+
+**Docs:** [docs.x1.xyz](https://docs.x1.xyz)
+**Explorer:** [explorer.mainnet.x1.xyz](https://explorer.mainnet.x1.xyz)
+
+### Cross-Chain Direct Deposit Mechanics
+
+```
+XNT CROSS-CHAIN INFLOW:
+├─ User connects wallet (same keypair works on both chains)
+├─ App switches RPC to X1 mainnet (rpc.mainnet.x1.xyz)
+├─ XNT transferred as NATIVE token on X1 (like SOL on Solana)
+├─ Deposit goes to basin address on X1 chain
+├─ Phase coordinate assigned based on X1 block slot
+├─ XNT can later be wrapped/minted on Solana as wXNT
+└─ Cross-chain coherence unified in basin accounting
+```
+
+### Coherence Contribution Formula
+
+$$
+C_{\text{XNT}} = \text{XNT}_{\text{amount}} \times P_{\text{XNT}} \times 1.369 \times \tau_k
+$$
+
+Where:
+- `P_XNT` = XNT price in USD
+- `1.369` = Tesla resonance weight (3-6-9)
+- `τₖ` = phase multiplier
+
+**Cross-chain native deposit. No wrapping required at infall.**
+
+### Why XNT? The 369 Harmonic
+
+| Property | Benefit |
+|----------|---------|
+| Tesla resonance | 3-6-9 frequency bridges Earth↔Intelligence |
+| SVM compatible | Same wallet, same address across chains |
+| Low-cost network | $5/day validators = true decentralization |
+| Native deposit | No wrapping overhead on entry |
+| Future wXNT | Can mint wrapped representation on Solana |
+
+### XNT Pathway Architecture
+
+```
+X1 CHAIN                                SOLANA CHAIN
+    │                                        │
+    │  ┌─────────────┐                      │
+    │  │   User      │                      │
+    │  │   Wallet    │◄────────────────────►│  Same keypair
+    │  └──────┬──────┘                      │
+    │         │                             │
+    │    RPC Switch                         │
+    │    rpc.mainnet.x1.xyz                 │
+    │         │                             │
+    │         ▼                             │
+    │  ┌─────────────┐                      │
+    │  │ Native XNT  │                      │
+    │  │  Transfer   │                      │
+    │  └──────┬──────┘                      │
+    │         │                             │
+    │         ▼                             │
+    │  ┌─────────────┐      Future         │  ┌─────────────┐
+    │  │ BASIN (X1)  │ ──── wXNT ─────────►│  │ BASIN (SOL) │
+    │  │ 96FoBv...   │      Bridge         │  │ 96FoBv...   │
+    │  └─────────────┘                      │  └─────────────┘
+    │                                        │
+    └────────────────────────────────────────┘
+              Same address on both chains
+```
+
+### XNT Infall Implementation
+
+```typescript
+const handleXNTDeposit = async () => {
+  // Create connection to X1 chain
+  const x1Connection = new Connection('https://rpc.mainnet.x1.xyz', 'confirmed');
+
+  // XNT is native on X1 (like SOL on Solana)
+  const transaction = new Transaction().add(
+    SystemProgram.transfer({
+      fromPubkey: wallet.publicKey,
+      toPubkey: BASIN_PDA, // Same address works on X1
+      lamports: depositAmount,
+    })
+  );
+
+  // Get blockhash from X1
+  const { blockhash } = await x1Connection.getLatestBlockhash();
+  transaction.recentBlockhash = blockhash;
+  transaction.feePayer = wallet.publicKey;
+
+  // Sign and send on X1
+  const signed = await wallet.signTransaction(transaction);
+  const signature = await x1Connection.sendRawTransaction(signed.serialize());
+  await x1Connection.confirmTransaction(signature);
+};
+```
+
+### Tesla Resonance Weight: 1.369x
+
+The 369 harmonic receives a **1.369x weight multiplier**:
+
+| Frequency | Asset | Weight | Significance |
+|-----------|-------|--------|--------------|
+| 365 | USDC | 1.0x | Earth cycle baseline |
+| **369** | **XNT** | **1.369x** | Tesla resonance premium |
+| 936 | wTAO | 1.272x | Intelligence amplification |
+
+**369 = 3 × 123 = 9 × 41**
+
+The number contains within it the pattern of creation (3), flow (6), and completion (9).
+
+### Basin XNT Holdings (X1 Chain)
+
+| Field | Value |
+|-------|-------|
+| Basin Address | `96FoBvWbtCCxPRGSwnFer5ZMUQSxyREAPkBBHUD42XhP` |
+| Chain | X1 Mainnet |
+| RPC | `https://rpc.mainnet.x1.xyz` |
+| Explorer | [View on X1](https://explorer.mainnet.x1.xyz/address/96FoBvWbtCCxPRGSwnFer5ZMUQSxyREAPkBBHUD42XhP) |
+| Purpose | Tesla resonance reserves |
+
+---
+
+## Cross-Chain Basin Architecture
+
+When all pathways are active, the basin holds **cross-chain multi-asset reserves**:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                     MULTI-ASSET BASIN                           │
+│                   CROSS-CHAIN BASIN                             │
 │                                                                 │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐             │
-│  │    USDC     │  │    wTAO     │  │    $TGF     │             │
-│  │    VAULT    │  │    VAULT    │  │   RESERVES  │             │
-│  │             │  │             │  │             │             │
-│  │  $XX,XXX    │  │  XX.XX TAO  │  │  29.14M     │             │
-│  │  (stable)   │  │  (intel)    │  │  (native)   │             │
-│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘             │
-│         │                │                │                     │
-│         └────────────────┼────────────────┘                     │
+│  SOLANA CHAIN                          X1 CHAIN                 │
+│  ════════════                          ════════                 │
+│                                                                 │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐  ┌─────────┐             │
+│  │  USDC   │ │  wTAO   │ │  $TGF   │  │   XNT   │             │
+│  │  VAULT  │ │  VAULT  │ │ RESERVE │  │  NATIVE │             │
+│  │  101    │ │  0.042  │ │ 29.14M  │  │   TBD   │             │
+│  │ (365)   │ │ (936)   │ │  (φ)    │  │  (369)  │             │
+│  └────┬────┘ └────┬────┘ └────┬────┘  └────┬────┘             │
+│       │          │          │            │                     │
+│       └──────────┴──────────┴────────────┘                     │
 │                          │                                      │
-│                   UNIFIED COHERENCE                             │
+│                 UNIFIED CROSS-CHAIN                             │
+│                     COHERENCE                                   │
 │                          │                                      │
 │              ┌───────────┴───────────┐                          │
 │              │                       │                          │
 │              ▼                       ▼                          │
 │        61.8% CORE             38.2% ALLOCATION                  │
 │     ┌─────────────┐         ┌─────────────────┐                │
-│     │ Multi-asset │         │   Child PTOs    │                │
+│     │ Multi-chain │         │   Child PTOs    │                │
 │     │  stability  │         │ (funded in any  │                │
 │     │   reserve   │         │  basin asset)   │                │
 │     └─────────────┘         └─────────────────┘                │
@@ -384,10 +543,10 @@ When both pathways are active, the basin holds **native multi-asset reserves**:
 ### Total Basin Value
 
 $$
-V_{\text{basin}} = V_{\text{USDC}} + V_{\text{TAO}} + V_{\text{TGF}} + V_{\text{SOL}}
+V_{\text{basin}} = V_{\text{USDC}} + V_{\text{XNT}} + V_{\text{TAO}} + V_{\text{TGF}} + V_{\text{SOL}}
 $$
 
-Where each asset contributes to **unified coherence** without conversion losses.
+Where each asset contributes to **unified coherence** without conversion losses across chains.
 
 ### Coherence Synthesis Equation
 
@@ -398,23 +557,33 @@ $$
 Where for each asset `i`:
 - `A_i` = amount held
 - `P_i` = USD price (1.0 for USDC)
-- `w_i` = weight multiplier (USDC=1.0, TAO=1.272, TGF=1.0, SOL=0.8)
+- `w_i` = weight multiplier:
+  - USDC = 1.0 (Earth baseline)
+  - XNT = **1.369** (Tesla resonance)
+  - TAO = 1.272 (Intelligence premium)
+  - TGF = 1.0 (Governance base)
+  - SOL = 0.8 (Volatile discount)
 - `τ_{k,i}` = average phase multiplier of depositors
 
-### Dual-Pathway Resonance
+### Quad-Pathway Resonance
 
-When USDC (stability) and TAO (intelligence) flow together:
+When all four harmonics flow together:
 
 ```
-         USDC ───────────►│◄─────────── TAO
-        (365 Hz)          │          (936 Hz)
-         Earth            │          Intelligence
-         Stability        │          Amplification
+         USDC ───────────►│◄─────────── XNT
+        (365 Hz)          │          (369 Hz)
+         Earth            │          Tesla
+         Stability        │          Resonance
                           │
                     ┌─────┴─────┐
                     │  COHERENCE │
-                    │  RESONANCE │
+                    │  SYNTHESIS │
                     └─────┬─────┘
+                          │
+         $TGF ───────────►│◄─────────── wTAO
+        (φ = 1.618)       │          (936 Hz)
+         Governance       │          Intelligence
+         Golden           │          Amplification
                           │
               Constructive Interference
                           │

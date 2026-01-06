@@ -157,9 +157,10 @@ export default function Home() {
           continue;
         }
 
+        const mint = config.mint; // TypeScript now knows this is non-null
         const programId = config.useToken2022 ? await getToken2022ProgramId() : TOKEN_PROGRAM_ID;
         const ata = await getAssociatedTokenAddressAsync(
-          config.mint,
+          mint,
           wallet.publicKey,
           false,
           programId
@@ -300,6 +301,15 @@ export default function Home() {
     }
 
     const config = ASSETS[assetType];
+
+    // Safety check - USDC and TAO always have mints
+    if (!config.mint) {
+      setStatus({ type: 'error', message: 'Invalid asset configuration' });
+      return;
+    }
+
+    const mint = config.mint; // TypeScript now knows this is non-null
+
     setLoading(true);
     setStatus({ type: 'info', message: `Preparing ${config.symbol} direct deposit...` });
 
@@ -308,7 +318,7 @@ export default function Home() {
 
       // Get user's token account
       const userAta = await getAssociatedTokenAddressAsync(
-        config.mint,
+        mint,
         wallet.publicKey,
         false,
         TOKEN_PROGRAM_ID
@@ -316,7 +326,7 @@ export default function Home() {
 
       // Get or create basin vault for this asset
       const basinVault = await getAssociatedTokenAddressAsync(
-        config.mint,
+        mint,
         BASIN_PDA,
         true, // allowOwnerOffCurve for PDA
         TOKEN_PROGRAM_ID
@@ -333,7 +343,7 @@ export default function Home() {
           wallet.publicKey,
           basinVault,
           BASIN_PDA,
-          config.mint,
+          mint,
           TOKEN_PROGRAM_ID
         );
         instructions.push(createVaultIx);

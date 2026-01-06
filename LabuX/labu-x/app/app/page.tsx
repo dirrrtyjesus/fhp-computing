@@ -15,8 +15,8 @@ import {
 // Token Mints
 const TGF_MINT = new PublicKey('2M7H4BKfaXduz1nvoLvtebei49qTLAjK7F4NPMM5pump');
 const USDC_MINT = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
-// wTAO on Solana (Wormhole wrapped) - placeholder until confirmed
-const WTAO_MINT = new PublicKey('HiTvYqEB1FEbgNeNbg8Dg3DDTmMm1E6T62h9sPsu1P91'); // TODO: confirm actual wTAO mint
+// wTAO on Solana (Wormhole wrapped)
+const WTAO_MINT = new PublicKey('9wAKgC8zXwSGaNgtkoNeFFkAfuBkW4BfUUuPkrx6nrQQ');
 
 const PROGRAM_ID = new PublicKey('6rivJsodwyZj7JbeJNeLD4F7K4tzxMq9mkEDkRxge7u5');
 const BASIN_PDA = new PublicKey('96FoBvWbtCCxPRGSwnFer5ZMUQSxyREAPkBBHUD42XhP');

@@ -68,7 +68,7 @@ const ASSETS: Record<AssetType, AssetConfig> = {
   },
   XNT: {
     mint: null, // Native token on X1
-    decimals: 18,
+    decimals: 9, // SVM-compatible = 9 decimals like SOL
     symbol: 'XNT',
     name: 'X1 Native Token',
     harmonic: '369 (Tesla)',

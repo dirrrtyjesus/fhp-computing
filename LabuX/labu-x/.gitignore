@@ -17,9 +17,10 @@ dist/
 .env.local
 .env*.local
 
-# Screenshots and temp files
+# Media files
 *.png
-Screenshot*.png
+*.mp4
+*.m4a
 Cargo.lock
 package-lock.json
 

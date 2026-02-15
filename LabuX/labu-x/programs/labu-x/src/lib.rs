@@ -20,64 +20,6 @@ declare_id!("6rivJsodwyZj7JbeJNeLD4F7K4tzxMq9mkEDkRxge7u5");
 pub mod labux {
     use super::*;
 
-    /// Initialize the LabuX protocol
-    // pub fn initialize(
-    //     ctx: Context<Initialize>,
-    //     window_epoch: i64,
-    // ) -> Result<()> {
-    //     instructions::initialize::handler(ctx, window_epoch)
-    // }
-
-    /// Mint LabuX with 1:1 collateral backing
-    // pub fn mint(
-    //     ctx: Context<MintLabuX>,
-    //     amount: u64,
-    // ) -> Result<()> {
-    //     instructions::mint::handler(ctx, amount)
-    // }
-
-    /// Burn LabuX and receive collateral
-    // pub fn burn(
-    //     ctx: Context<BurnLabuX>,
-    //     amount: u64,
-    // ) -> Result<()> {
-    //     instructions::burn::handler(ctx, amount)
-    // }
-
-    /// Transfer LabuX with optional TCP
-    // pub fn transfer_with_tcp(
-    //     ctx: Context<TransferWithTCP>,
-    //     amount: u64,
-    //     include_tcp: bool,
-    // ) -> Result<()> {
-    //     instructions::transfer::handler(ctx, amount, include_tcp)
-    // }
-
-    /// Accrue TCP for an account
-    // pub fn accrue_tcp(ctx: Context<AccrueTCP>) -> Result<()> {
-    //     instructions::accrue_tcp::handler(ctx)
-    // }
-
-    /// Harvest TCP during harmonic window
-    // pub fn harvest_tcp(ctx: Context<HarvestTCP>) -> Result<()> {
-    //     instructions::harvest_tcp::handler(ctx)
-    // }
-
-    /// Update account τₖ (oracle/governance)
-    // pub fn update_tau_k(
-    //     ctx: Context<UpdateTauK>,
-    //     new_tau_k: u64,
-    // ) -> Result<()> {
-    //     instructions::update_tau_k::handler(ctx, new_tau_k)
-    // }
-
-    /// Record phase lock event
-    // pub fn record_phase_lock(ctx: Context<RecordPhaseLock>) -> Result<()> {
-    //     instructions::record_phase_lock::handler(ctx)
-    // }
-
-    // --- Genesis Fund (PTO²) Instructions ---
-
     /// Initialize the Temporal Genesis Fund (PTO²)
     /// Must be called once before any other Genesis Fund operations
     pub fn initialize_genesis_fund(ctx: Context<InitializeGenesisFund>) -> Result<()> {
@@ -108,5 +50,10 @@ pub mod labux {
         coherence_score: u16,
     ) -> Result<()> {
         genesis::emit::handler(ctx, coherence_score)
+    }
+
+    /// One-time migration: realloc GenesisFund and create protocol fee vault PDA
+    pub fn migrate_genesis_fund(ctx: Context<MigrateGenesisFund>) -> Result<()> {
+        genesis::migrate::handler(ctx)
     }
 }

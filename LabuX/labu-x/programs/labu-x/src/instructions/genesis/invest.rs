@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{self, TransferChecked, TokenAccount, TokenInterface, Mint};
 use crate::state::genesis_fund::*;
 
-use crate::constants::TGF_MINT_STRING;
+use crate::constants::{TGF_MINT_STRING, DEPOSIT_FEE_BPS, BPS_DENOMINATOR};
 use crate::errors::LabuXError;
 use std::str::FromStr;
 
@@ -33,6 +33,9 @@ pub struct Invest<'info> {
     #[account(mut)]
     pub fund_vault: InterfaceAccount<'info, TokenAccount>,
 
+    #[account(mut)]
+    pub protocol_fee_vault: InterfaceAccount<'info, TokenAccount>,
+
     pub mint: InterfaceAccount<'info, Mint>,
 
     pub token_program: Interface<'info, TokenInterface>,
@@ -53,31 +56,45 @@ pub fn handler(ctx: Context<Invest>, amount: u64) -> Result<()> {
     let fund = &mut ctx.accounts.fund;
     let investor_record = &mut ctx.accounts.investor_record;
 
-    // 1. Calculate Golden Split
-    // Core = 61.8% (φ⁻¹)
-    let core_share = (amount as u128 * PHI_INV_SCALED as u128 / SCALE as u128) as u64;
-    let allocation_share = amount - core_share;
+    // 1. Calculate Fee
+    let fee = amount * DEPOSIT_FEE_BPS / BPS_DENOMINATOR;
+    let net_amount = amount - fee;
 
-    // 2. Update Fund State
+    // 2. Calculate Golden Split on net amount
+    // Core = 61.8% (φ⁻¹)
+    let core_share = (net_amount as u128 * PHI_INV_SCALED as u128 / SCALE as u128) as u64;
+    let allocation_share = net_amount - core_share;
+
+    // 3. Update Fund State
     fund.core_treasury += core_share;
     fund.allocation_pool += allocation_share;
-    fund.total_mass += amount;
+    fund.total_mass += net_amount;
+    fund.total_fees_collected += fee;
 
-    // 3. Record Phase Data
+    // 4. Record Phase Data
     let clock = Clock::get()?;
     let phase = (clock.slot % 360) as u16;
 
-    // If existing record, weight average the phase (simplified: just update for now)
-    // Ideally, we'd have a list or weighted avg logic.
-    // For MVP: Overwrite/Update timestamp and amount
     investor_record.investor = ctx.accounts.investor.key();
-    investor_record.amount += amount;
-    investor_record.phase = phase; // Simplified: New phase overwrites
+    investor_record.amount += net_amount;
+    investor_record.phase = phase;
     investor_record.timestamp = clock.unix_timestamp;
     investor_record.claimed = false;
     investor_record.entry_mass = fund.total_mass;
 
-    // 4. Transfer Tokens
+    // 5. Transfer fee to protocol vault (investor signs)
+    if fee > 0 {
+        let fee_cpi = TransferChecked {
+            from: ctx.accounts.investor_token_account.to_account_info(),
+            to: ctx.accounts.protocol_fee_vault.to_account_info(),
+            authority: ctx.accounts.investor.to_account_info(),
+            mint: ctx.accounts.mint.to_account_info(),
+        };
+        let fee_ctx = CpiContext::new(ctx.accounts.token_program.to_account_info(), fee_cpi);
+        token_interface::transfer_checked(fee_ctx, fee, ctx.accounts.mint.decimals)?;
+    }
+
+    // 6. Transfer net amount to fund vault (investor signs)
     let cpi_accounts = TransferChecked {
         from: ctx.accounts.investor_token_account.to_account_info(),
         to: ctx.accounts.fund_vault.to_account_info(),
@@ -85,9 +102,9 @@ pub fn handler(ctx: Context<Invest>, amount: u64) -> Result<()> {
         mint: ctx.accounts.mint.to_account_info(),
     };
     let cpi_ctx = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
-    token_interface::transfer_checked(cpi_ctx, amount, ctx.accounts.mint.decimals)?;
+    token_interface::transfer_checked(cpi_ctx, net_amount, ctx.accounts.mint.decimals)?;
 
-    msg!("Genesis Infall: {} (Phase: {}°)", amount, phase);
+    msg!("Genesis Infall: {} (Fee: {}, Net: {}, Phase: {}°)", amount, fee, net_amount, phase);
     msg!("Core: {} | Alloc: {}", core_share, allocation_share);
 
     Ok(())

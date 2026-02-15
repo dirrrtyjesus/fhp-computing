@@ -1,6 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{self, TransferChecked, TokenAccount, TokenInterface, Mint};
 use crate::state::genesis_fund::*;
+use crate::constants::{SPAWN_FEE_BPS, BPS_DENOMINATOR};
 use crate::errors::LabuXError;
 
 #[derive(Accounts)]
@@ -35,6 +36,9 @@ pub struct SpawnChildPTO<'info> {
     #[account(mut)]
     pub child_vault: InterfaceAccount<'info, TokenAccount>,
 
+    #[account(mut)]
+    pub protocol_fee_vault: InterfaceAccount<'info, TokenAccount>,
+
     pub mint: InterfaceAccount<'info, Mint>,
 
     pub token_program: Interface<'info, TokenInterface>,
@@ -62,12 +66,34 @@ pub fn handler(
     // Safety check: must be > 0
     require!(seed_capital > 0, LabuXError::InsufficientBasinDepth);
 
-    // 2. Transfer Seed
+    // 2. Calculate fee
+    let fee = seed_capital * SPAWN_FEE_BPS / BPS_DENOMINATOR;
+    let net_seed = seed_capital - fee;
+
+    // 3. Deduct full seed_capital from allocation pool
     fund.allocation_pool -= seed_capital;
+    fund.total_fees_collected += fee;
 
     let seeds = &[b"genesis_fund".as_ref(), &[fund.bump]];
     let signer = &[&seeds[..]];
 
+    // 4. Transfer fee to protocol vault (fund PDA signs)
+    if fee > 0 {
+        let fee_cpi = TransferChecked {
+            from: ctx.accounts.fund_vault.to_account_info(),
+            to: ctx.accounts.protocol_fee_vault.to_account_info(),
+            authority: fund.to_account_info(),
+            mint: ctx.accounts.mint.to_account_info(),
+        };
+        let fee_ctx = CpiContext::new_with_signer(
+            ctx.accounts.token_program.to_account_info(),
+            fee_cpi,
+            signer
+        );
+        token_interface::transfer_checked(fee_ctx, fee, ctx.accounts.mint.decimals)?;
+    }
+
+    // 5. Transfer net seed to child vault (fund PDA signs)
     let cpi_accounts = TransferChecked {
         from: ctx.accounts.fund_vault.to_account_info(),
         to: ctx.accounts.child_vault.to_account_info(),
@@ -79,20 +105,19 @@ pub fn handler(
         cpi_accounts,
         signer
     );
-    token_interface::transfer_checked(cpi_ctx, seed_capital, ctx.accounts.mint.decimals)?;
+    token_interface::transfer_checked(cpi_ctx, net_seed, ctx.accounts.mint.decimals)?;
 
-    // 3. Initialize Child
+    // 6. Initialize Child
     child.creator = ctx.accounts.creator.key();
     child.sector = sector;
     child.funding_goal = funding_goal;
     child.coherence_mass = coherence_mass;
-    child.seed_capital = seed_capital;
+    child.seed_capital = net_seed;
     child.emission_active = false;
     child.coherence_score = 0;
     child.bump = ctx.bumps.child_pto;
 
-    msg!("Spawned Child PTO in sector {:?}", sector);
-    msg!("Seed: {}", seed_capital);
+    msg!("Spawned Child PTO in sector {:?} (Fee: {}, Net Seed: {})", sector, fee, net_seed);
 
     Ok(())
 }

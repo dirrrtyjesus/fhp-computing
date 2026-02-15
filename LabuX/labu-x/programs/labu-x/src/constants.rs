@@ -22,3 +22,9 @@ pub const TGF_MINT_STRING: &str = "2M7H4BKfaXduz1nvoLvtebei49qTLAjK7F4NPMM5pump"
 
 pub const WINDOW_DURATION: i64 = 86400; // 1 Day (Earth Harmonic)
 pub const TESLA_HARMONIC: u64 = 369;    // 3-6-9 pattern
+
+// Protocol Fee Schedule (basis points)
+pub const DEPOSIT_FEE_BPS: u64 = 30;     // 0.3% on invest infall
+pub const SPAWN_FEE_BPS: u64 = 50;       // 0.5% on child PTO spawn
+pub const YIELD_FEE_BPS: u64 = 500;      // 5% on yield emission
+pub const BPS_DENOMINATOR: u64 = 10_000;

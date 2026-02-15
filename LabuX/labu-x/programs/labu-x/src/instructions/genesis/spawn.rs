@@ -52,6 +52,7 @@ pub fn handler(
     coherence_mass: u64
 ) -> Result<()> {
     let fund = &mut ctx.accounts.fund;
+    require!(!fund.paused, LabuXError::ProtocolPaused);
     let child = &mut ctx.accounts.child_pto;
 
     // 1. Calculate Seed Capital

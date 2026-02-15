@@ -56,4 +56,14 @@ pub mod labux {
     pub fn migrate_genesis_fund(ctx: Context<MigrateGenesisFund>) -> Result<()> {
         genesis::migrate::handler(ctx)
     }
+
+    /// Emergency pause — halts invest, spawn, emit
+    pub fn emergency_pause(ctx: Context<EmergencyPause>) -> Result<()> {
+        genesis::pause::pause_handler(ctx)
+    }
+
+    /// Unpause — resumes normal operations
+    pub fn emergency_unpause(ctx: Context<EmergencyPause>) -> Result<()> {
+        genesis::pause::unpause_handler(ctx)
+    }
 }

@@ -2,6 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{self, TransferChecked, TokenAccount, TokenInterface, Mint};
 use crate::state::genesis_fund::*;
 use crate::constants::{YIELD_FEE_BPS, BPS_DENOMINATOR};
+use crate::errors::LabuXError;
 
 #[derive(Accounts)]
 pub struct EmitYield<'info> {
@@ -39,6 +40,7 @@ pub struct EmitYield<'info> {
 
 pub fn handler(ctx: Context<EmitYield>, coherence_score: u16) -> Result<()> {
     let fund = &mut ctx.accounts.fund;
+    require!(!fund.paused, LabuXError::ProtocolPaused);
     let record = &mut ctx.accounts.investor_record;
 
     // 1. Calculate Yield

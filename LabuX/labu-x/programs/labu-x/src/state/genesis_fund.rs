@@ -37,6 +37,9 @@ pub struct GenesisFund {
 
     /// Running total of all fees collected
     pub total_fees_collected: u64,
+
+    /// Emergency pause flag
+    pub paused: bool,
 }
 
 impl GenesisFund {
@@ -47,7 +50,8 @@ impl GenesisFund {
         8 +  // total_mass
         1 +  // bump
         32 + // protocol_treasury
-        8;   // total_fees_collected
+        8 +  // total_fees_collected
+        1;   // paused
 }
 
 /// A Child PTO spawned by the Genesis Fund

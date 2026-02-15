@@ -54,6 +54,7 @@ pub fn handler(ctx: Context<Invest>, amount: u64) -> Result<()> {
     }
 
     let fund = &mut ctx.accounts.fund;
+    require!(!fund.paused, LabuXError::ProtocolPaused);
     let investor_record = &mut ctx.accounts.investor_record;
 
     // 1. Calculate Fee

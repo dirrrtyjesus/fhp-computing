@@ -40,10 +40,11 @@ pub fn handler(ctx: Context<MigrateGenesisFund>) -> Result<()> {
 
     fund.protocol_treasury = ctx.accounts.protocol_fee_vault.key();
     fund.total_fees_collected = 0;
+    fund.paused = false;
 
     msg!("Migration complete!");
     msg!("  Protocol treasury: {}", fund.protocol_treasury);
-    msg!("  Controlled by: GenesisFund PDA");
+    msg!("  Paused: false");
 
     Ok(())
 }

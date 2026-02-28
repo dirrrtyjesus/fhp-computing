@@ -31,6 +31,15 @@ pub struct GenesisFund {
 
     /// Bump seed
     pub bump: u8,
+
+    /// Protocol fee treasury wallet (set via migration)
+    pub protocol_treasury: Pubkey,
+
+    /// Running total of all fees collected
+    pub total_fees_collected: u64,
+
+    /// Emergency pause flag
+    pub paused: bool,
 }
 
 impl GenesisFund {
@@ -39,7 +48,10 @@ impl GenesisFund {
         8 +  // core_treasury
         8 +  // allocation_pool
         8 +  // total_mass
-        1;   // bump
+        1 +  // bump
+        32 + // protocol_treasury
+        8 +  // total_fees_collected
+        1;   // paused
 }
 
 /// A Child PTO spawned by the Genesis Fund

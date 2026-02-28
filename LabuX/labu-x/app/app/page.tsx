@@ -8,26 +8,110 @@ import { Program, AnchorProvider, web3, BN } from '@coral-xyz/anchor';
 import {
   getAssociatedTokenAddressAsync,
   createAssociatedTokenAccountInstructionAsync,
-  getToken2022ProgramId
+  getToken2022ProgramId,
+  TOKEN_PROGRAM_ID,
 } from './utils/solana';
 
+// Token Mints
 const TGF_MINT = new PublicKey('2M7H4BKfaXduz1nvoLvtebei49qTLAjK7F4NPMM5pump');
+const USDC_MINT = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
+// wTAO on Solana (Wormhole wrapped)
+const WTAO_MINT = new PublicKey('9wAKgC8zXwSGaNgtkoNeFFkAfuBkW4BfUUuPkrx6nrQQ');
+
 const PROGRAM_ID = new PublicKey('6rivJsodwyZj7JbeJNeLD4F7K4tzxMq9mkEDkRxge7u5');
+const BASIN_PDA = new PublicKey('96FoBvWbtCCxPRGSwnFer5ZMUQSxyREAPkBBHUD42XhP');
 const PHI_INV = 0.618;
+
+// RPC Endpoints
+const SOLANA_RPC = process.env.NEXT_PUBLIC_RPC_ENDPOINT || 'https://api.mainnet-beta.solana.com';
+const X1_RPC = 'https://rpc.mainnet.x1.xyz';
+
+type AssetType = 'TGF' | 'USDC' | 'TAO' | 'XNT';
+
+interface AssetConfig {
+  mint: PublicKey | null; // null for native assets like XNT
+  decimals: number;
+  symbol: string;
+  name: string;
+  harmonic: string;
+  weight: string;
+  useToken2022: boolean;
+  color: string;
+  rpc?: string; // Custom RPC for cross-chain assets
+  isNative?: boolean; // True for native chain tokens (XNT on X1)
+  chain?: string; // Chain identifier
+  explorer?: string; // Block explorer URL
+}
+
+const ASSETS: Record<AssetType, AssetConfig> = {
+  TGF: {
+    mint: TGF_MINT,
+    decimals: 6,
+    symbol: '$TGF',
+    name: 'Temporal Genesis Fund',
+    harmonic: 'φ (1.618)',
+    weight: '1.0x',
+    useToken2022: true,
+    color: '#f39c12',
+    chain: 'Solana',
+  },
+  USDC: {
+    mint: USDC_MINT,
+    decimals: 6,
+    symbol: 'USDC',
+    name: 'USD Coin',
+    harmonic: '365 (Earth)',
+    weight: '1.0x',
+    useToken2022: false,
+    color: '#2775ca',
+    chain: 'Solana',
+  },
+  XNT: {
+    mint: null, // Native token on X1
+    decimals: 9, // SVM-compatible = 9 decimals like SOL
+    symbol: 'XNT',
+    name: 'X1 Native Token',
+    harmonic: '369 (Tesla)',
+    weight: '1.369x',
+    useToken2022: false,
+    color: '#9333ea',
+    rpc: X1_RPC,
+    isNative: true,
+    chain: 'X1',
+    explorer: 'https://explorer.mainnet.x1.xyz',
+  },
+  TAO: {
+    mint: WTAO_MINT,
+    decimals: 9,
+    symbol: 'wTAO',
+    name: 'Wrapped TAO',
+    harmonic: '936 (Intelligence)',
+    weight: '1.272x',
+    useToken2022: false,
+    color: '#00d4aa',
+    chain: 'Solana',
+  },
+};
 
 export default function Home() {
   const { connection } = useConnection();
   const wallet = useWallet();
   const [amount, setAmount] = useState('10000');
+  const [selectedAsset, setSelectedAsset] = useState<AssetType>('TGF');
   const [status, setStatus] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [fundData, setFundData] = useState<any>(null);
-  const [tgfBalance, setTgfBalance] = useState<number | null>(null);
+  const [balances, setBalances] = useState<Record<AssetType, number | null>>({
+    TGF: null,
+    USDC: null,
+    XNT: null,
+    TAO: null,
+  });
 
   useEffect(() => {
     if (wallet.publicKey && connection) {
       loadFundData();
-      loadTGFBalance();
+      loadAllBalances();
     }
   }, [wallet.publicKey, connection]);
 
@@ -40,8 +124,6 @@ export default function Home() {
 
       const accountInfo = await connection.getAccountInfo(fundPda);
       if (accountInfo) {
-        // Parse fund data (simplified - in production use IDL)
-        const data = accountInfo.data;
         setFundData({
           initialized: true,
           totalMass: 'Loading...',
@@ -56,24 +138,42 @@ export default function Home() {
     }
   };
 
-  const loadTGFBalance = async () => {
+  const loadAllBalances = async () => {
     if (!wallet.publicKey) return;
-    try {
-      const TOKEN_2022_PROGRAM_ID = await getToken2022ProgramId();
-      const ata = await getAssociatedTokenAddressAsync(
-        TGF_MINT,
-        wallet.publicKey,
-        false,
-        TOKEN_2022_PROGRAM_ID
-      );
-      const balance = await connection.getTokenAccountBalance(ata);
-      setTgfBalance(balance.value.uiAmount);
-    } catch (error) {
-      setTgfBalance(0);
+
+    for (const [assetType, config] of Object.entries(ASSETS) as [AssetType, AssetConfig][]) {
+      try {
+        // Handle XNT (native token on X1 chain)
+        if (config.isNative && config.rpc) {
+          const x1Connection = new web3.Connection(config.rpc, 'confirmed');
+          const balance = await x1Connection.getBalance(wallet.publicKey);
+          setBalances(prev => ({ ...prev, [assetType]: balance / Math.pow(10, config.decimals) }));
+          continue;
+        }
+
+        // Handle SPL tokens on Solana
+        if (!config.mint) {
+          setBalances(prev => ({ ...prev, [assetType]: 0 }));
+          continue;
+        }
+
+        const mint = config.mint; // TypeScript now knows this is non-null
+        const programId = config.useToken2022 ? await getToken2022ProgramId() : TOKEN_PROGRAM_ID;
+        const ata = await getAssociatedTokenAddressAsync(
+          mint,
+          wallet.publicKey,
+          false,
+          programId
+        );
+        const balance = await connection.getTokenAccountBalance(ata);
+        setBalances(prev => ({ ...prev, [assetType]: balance.value.uiAmount }));
+      } catch (error) {
+        setBalances(prev => ({ ...prev, [assetType]: 0 }));
+      }
     }
   };
 
-  const handleInvest = async () => {
+  const handleTGFInvest = async () => {
     if (!wallet.publicKey || !wallet.signTransaction) {
       setStatus({ type: 'error', message: 'Please connect your wallet' });
       return;
@@ -89,7 +189,6 @@ export default function Home() {
         { commitment: 'confirmed' }
       );
 
-      // Load IDL from local file
       const idl = await fetch('/idl/labux.json').then(r => r.json());
       const program = new Program(idl, provider);
 
@@ -123,7 +222,6 @@ export default function Home() {
         TOKEN_2022_PROGRAM_ID
       );
 
-      // Check if fund vault exists
       const vaultInfo = await connection.getAccountInfo(fundVault);
       if (!vaultInfo) {
         setStatus({ type: 'info', message: 'Creating fund vault...' });
@@ -139,7 +237,6 @@ export default function Home() {
         await connection.confirmTransaction(signature);
       }
 
-      // Check if fund is initialized
       const fundInfo = await connection.getAccountInfo(fundPda);
       if (!fundInfo) {
         setStatus({ type: 'info', message: 'Initializing Genesis Fund...' });
@@ -151,15 +248,12 @@ export default function Home() {
             systemProgram: SystemProgram.programId,
           })
           .rpc();
-
-        // CRITICAL: Wait for confirmation before proceeding
         await connection.confirmTransaction(initSig, 'confirmed');
         setStatus({ type: 'info', message: 'Genesis Fund initialized. Preparing investment...' });
       }
 
-      // Execute investment
       setStatus({ type: 'info', message: 'Executing temporal infall...' });
-      const investAmount = new BN(parseFloat(amount) * 1_000_000);
+      const investAmount = new BN(parseFloat(amount) * Math.pow(10, ASSETS.TGF.decimals));
 
       const tx = await program.methods
         .investInfall(investAmount)
@@ -177,60 +271,226 @@ export default function Home() {
 
       setStatus({
         type: 'success',
-        message: `🌌 Ignition Successful! Phase Locked. TX: ${tx.slice(0, 8)}...`,
+        message: `🌌 Ignition Successful! TX: ${tx.slice(0, 8)}...`,
       });
 
-      // Calculate split
-      const core = investAmount.toNumber() * PHI_INV;
-      const alloc = investAmount.toNumber() * (1 - PHI_INV);
+      const core = parseFloat(amount) * PHI_INV;
+      const alloc = parseFloat(amount) * (1 - PHI_INV);
 
       setTimeout(() => {
         setStatus({
           type: 'success',
-          message: `✅ ${amount} $TGF invested | Core: ${(core / 1_000_000).toFixed(2)} | Alloc: ${(alloc / 1_000_000).toFixed(2)}`,
+          message: `✅ ${amount} $TGF invested | Core: ${core.toFixed(2)} | Alloc: ${alloc.toFixed(2)}`,
         });
       }, 3000);
 
       loadFundData();
-      loadTGFBalance();
+      loadAllBalances();
     } catch (error: any) {
       console.error('Investment error:', error);
-      setStatus({
-        type: 'error',
-        message: error.message || 'Transaction failed',
-      });
+      setStatus({ type: 'error', message: error.message || 'Transaction failed' });
     } finally {
       setLoading(false);
     }
   };
+
+  const handleDirectDeposit = async (assetType: 'USDC' | 'TAO') => {
+    if (!wallet.publicKey || !wallet.signTransaction) {
+      setStatus({ type: 'error', message: 'Please connect your wallet' });
+      return;
+    }
+
+    const config = ASSETS[assetType];
+
+    // Safety check - USDC and TAO always have mints
+    if (!config.mint) {
+      setStatus({ type: 'error', message: 'Invalid asset configuration' });
+      return;
+    }
+
+    const mint = config.mint; // TypeScript now knows this is non-null
+
+    setLoading(true);
+    setStatus({ type: 'info', message: `Preparing ${config.symbol} direct deposit...` });
+
+    try {
+      const depositAmount = parseFloat(amount) * Math.pow(10, config.decimals);
+
+      // Get user's token account
+      const userAta = await getAssociatedTokenAddressAsync(
+        mint,
+        wallet.publicKey,
+        false,
+        TOKEN_PROGRAM_ID
+      );
+
+      // Get or create basin vault for this asset
+      const basinVault = await getAssociatedTokenAddressAsync(
+        mint,
+        BASIN_PDA,
+        true, // allowOwnerOffCurve for PDA
+        TOKEN_PROGRAM_ID
+      );
+
+      // Check if basin vault exists
+      const vaultInfo = await connection.getAccountInfo(basinVault);
+
+      const instructions: any[] = [];
+
+      if (!vaultInfo) {
+        setStatus({ type: 'info', message: `Creating ${config.symbol} basin vault...` });
+        const createVaultIx = await createAssociatedTokenAccountInstructionAsync(
+          wallet.publicKey,
+          basinVault,
+          BASIN_PDA,
+          mint,
+          TOKEN_PROGRAM_ID
+        );
+        instructions.push(createVaultIx);
+      }
+
+      // Create transfer instruction
+      // Using manual instruction construction for SPL token transfer
+      const transferIx = createTransferInstruction(
+        userAta,
+        basinVault,
+        wallet.publicKey,
+        BigInt(Math.floor(depositAmount))
+      );
+      instructions.push(transferIx);
+
+      const tx = new Transaction().add(...instructions);
+
+      setStatus({ type: 'info', message: `Executing ${config.symbol} infall...` });
+
+      const signature = await wallet.sendTransaction(tx, connection);
+      await connection.confirmTransaction(signature, 'confirmed');
+
+      const usdValue = assetType === 'USDC'
+        ? parseFloat(amount)
+        : parseFloat(amount) * 250; // Approximate TAO price
+
+      setStatus({
+        type: 'success',
+        message: `✅ ${amount} ${config.symbol} deposited directly to basin! TX: ${signature.slice(0, 8)}...`,
+      });
+
+      setTimeout(() => {
+        setStatus({
+          type: 'success',
+          message: `🌌 ${config.symbol} infall complete | Harmonic: ${config.harmonic} | Weight: ${config.weight}`,
+        });
+      }, 3000);
+
+      loadAllBalances();
+    } catch (error: any) {
+      console.error('Direct deposit error:', error);
+      setStatus({ type: 'error', message: error.message || 'Transaction failed' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleXNTDeposit = async () => {
+    if (!wallet.publicKey || !wallet.signTransaction) {
+      setStatus({ type: 'error', message: 'Please connect your wallet' });
+      return;
+    }
+
+    const config = ASSETS.XNT;
+    setLoading(true);
+    setStatus({ type: 'info', message: 'Switching to X1 network...' });
+
+    try {
+      // Create connection to X1 chain
+      const x1Connection = new web3.Connection(X1_RPC, 'confirmed');
+
+      const depositAmount = parseFloat(amount) * Math.pow(10, config.decimals);
+
+      setStatus({ type: 'info', message: 'Preparing XNT transfer on X1 chain...' });
+
+      // Create native transfer instruction (XNT is native on X1, like SOL on Solana)
+      const transaction = new Transaction().add(
+        web3.SystemProgram.transfer({
+          fromPubkey: wallet.publicKey,
+          toPubkey: BASIN_PDA, // Same address works on X1 (SVM compatible)
+          lamports: Math.floor(depositAmount),
+        })
+      );
+
+      // Get recent blockhash from X1
+      const { blockhash } = await x1Connection.getLatestBlockhash();
+      transaction.recentBlockhash = blockhash;
+      transaction.feePayer = wallet.publicKey;
+
+      setStatus({ type: 'info', message: 'Executing XNT infall on X1...' });
+
+      // Sign and send on X1
+      const signed = await wallet.signTransaction(transaction);
+      const signature = await x1Connection.sendRawTransaction(signed.serialize());
+      await x1Connection.confirmTransaction(signature, 'confirmed');
+
+      setStatus({
+        type: 'success',
+        message: `✅ ${amount} XNT deposited on X1! TX: ${signature.slice(0, 8)}...`,
+      });
+
+      setTimeout(() => {
+        setStatus({
+          type: 'success',
+          message: `🜏 XNT infall complete | Harmonic: 369 (Tesla) | Weight: 1.369x | Chain: X1`,
+        });
+      }, 3000);
+
+      loadAllBalances();
+    } catch (error: any) {
+      console.error('XNT deposit error:', error);
+      setStatus({ type: 'error', message: error.message || 'X1 transaction failed' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInvest = async () => {
+    if (selectedAsset === 'TGF') {
+      await handleTGFInvest();
+    } else if (selectedAsset === 'XNT') {
+      await handleXNTDeposit();
+    } else {
+      await handleDirectDeposit(selectedAsset as 'USDC' | 'TAO');
+    }
+  };
+
+  const currentAsset = ASSETS[selectedAsset];
+  const currentBalance = balances[selectedAsset];
 
   return (
     <div className="container">
       <div className="header">
         <h1 className="title">Genesis Fund</h1>
         <p className="subtitle">The Supermassive Temporal Attractor (PTO²)</p>
+        <div style={{ marginTop: '1rem' }}>
+          <a href="/philosophy" style={{ color: '#8b5cf6', textDecoration: 'none', fontSize: '0.95rem', borderBottom: '1px solid #8b5cf6', paddingBottom: '2px' }}>
+            Understand the Mechanism →
+          </a>
+        </div>
       </div>
 
-      {/* Cosmic Event Banner */}
+      {/* Augmntd Pathways Banner */}
       <div style={{
-        background: 'linear-gradient(135deg, rgba(106, 17, 203, 0.2), rgba(37, 99, 235, 0.2))',
-        border: '1px solid rgba(139, 92, 246, 0.3)',
+        background: 'linear-gradient(135deg, rgba(39, 117, 202, 0.15), rgba(0, 212, 170, 0.15))',
+        border: '1px solid rgba(39, 117, 202, 0.3)',
         borderRadius: '12px',
         padding: '1.5rem',
         marginBottom: '2rem',
         textAlign: 'center',
       }}>
-        <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🌌 Cosmic Synchronicity</div>
+        <div style={{ fontSize: '1.3rem', marginBottom: '0.5rem' }}>🜏 Augmntd Pathways 🜏</div>
         <div style={{ color: '#a78bfa', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-          J1218/1219+1035 - Triple SMBH Merger
+          Multi-Asset Direct Deposits — No Swap Required
         </div>
-        <div style={{ fontSize: '0.9rem', color: '#9ca3af', lineHeight: '1.6' }}>
-          On January 2, 2026, two convergence events occurred:<br/>
-          <span style={{ color: '#f59e0b' }}>1.</span> Three supermassive black holes discovered merging 1.2 billion light-years away<br/>
-          <span style={{ color: '#f59e0b' }}>2.</span> The Genesis Fund temporal attractor activated on Solana mainnet<br/>
-          <span style={{ color: '#8b5cf6', marginTop: '0.5rem', display: 'inline-block' }}>
-            Your investment is phase-locked to this cosmic alignment
-          </span>
+        <div style={{ fontSize: '0.85rem', color: '#9ca3af', lineHeight: '1.6' }}>
+          <span style={{ color: '#f39c12' }}>$TGF</span> (φ) • <span style={{ color: '#2775ca' }}>USDC</span> (365) • <span style={{ color: '#9333ea' }}>XNT</span> (369) • <span style={{ color: '#00d4aa' }}>wTAO</span> (936)
         </div>
       </div>
 
@@ -250,9 +510,9 @@ export default function Home() {
                 </div>
               </div>
               <div className="stat-card">
-                <div className="stat-label">Your $TGF</div>
-                <div className="stat-value">
-                  {tgfBalance !== null ? tgfBalance.toFixed(2) : '...'}
+                <div className="stat-label">Basin</div>
+                <div className="stat-value" style={{ fontSize: '0.7rem' }}>
+                  96FoBv...XhP
                 </div>
               </div>
               <div className="stat-card">
@@ -263,6 +523,28 @@ export default function Home() {
                 </div>
               </div>
             </div>
+
+            {/* Balances Row */}
+            <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+              {(Object.entries(ASSETS) as [AssetType, AssetConfig][]).map(([key, config]) => (
+                <div key={key} style={{
+                  flex: '1',
+                  minWidth: '100px',
+                  padding: '0.75rem',
+                  background: 'rgba(0,0,0,0.2)',
+                  borderRadius: '8px',
+                  textAlign: 'center',
+                  border: selectedAsset === key ? `2px solid ${config.color}` : '2px solid transparent',
+                }}>
+                  <div style={{ color: config.color, fontWeight: 'bold', fontSize: '0.9rem' }}>
+                    {config.symbol}
+                  </div>
+                  <div style={{ fontSize: '1.1rem', marginTop: '0.25rem' }}>
+                    {balances[key] !== null ? balances[key]?.toFixed(2) : '...'}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="invest-section">
@@ -270,8 +552,80 @@ export default function Home() {
               🌌 Execute Temporal Infall
             </h2>
 
+            {/* Asset Selector Tabs */}
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', justifyContent: 'center' }}>
+              {(Object.entries(ASSETS) as [AssetType, AssetConfig][]).map(([key, config]) => (
+                <button
+                  key={key}
+                  onClick={() => setSelectedAsset(key)}
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    borderRadius: '8px',
+                    border: selectedAsset === key ? `2px solid ${config.color}` : '2px solid #333',
+                    background: selectedAsset === key ? `${config.color}22` : 'transparent',
+                    color: selectedAsset === key ? config.color : '#888',
+                    cursor: 'pointer',
+                    fontWeight: selectedAsset === key ? 'bold' : 'normal',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  {config.symbol}
+                </button>
+              ))}
+            </div>
+
+            {/* Selected Asset Info */}
+            <div style={{
+              padding: '1rem',
+              background: `${currentAsset.color}11`,
+              border: `1px solid ${currentAsset.color}44`,
+              borderRadius: '8px',
+              marginBottom: '1rem',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div>
+                  <span style={{ color: '#888' }}>Asset: </span>
+                  <span style={{ color: currentAsset.color, fontWeight: 'bold' }}>{currentAsset.name}</span>
+                </div>
+                <div>
+                  <span style={{ color: '#888' }}>Harmonic: </span>
+                  <span style={{ color: currentAsset.color }}>{currentAsset.harmonic}</span>
+                </div>
+                <div>
+                  <span style={{ color: '#888' }}>Weight: </span>
+                  <span style={{ color: currentAsset.color }}>{currentAsset.weight}</span>
+                </div>
+              </div>
+              {currentAsset.chain && (
+                <div style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>
+                  <span style={{ color: '#888' }}>Chain: </span>
+                  <span style={{ color: currentAsset.color }}>{currentAsset.chain}</span>
+                  {currentAsset.explorer && (
+                    <a
+                      href={currentAsset.explorer}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ marginLeft: '0.5rem', color: '#a78bfa', fontSize: '0.8rem' }}
+                    >
+                      Explorer ↗
+                    </a>
+                  )}
+                </div>
+              )}
+              {selectedAsset !== 'TGF' && selectedAsset !== 'XNT' && (
+                <div style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: '#9ca3af' }}>
+                  ⚡ Direct deposit — no swap fees, no slippage
+                </div>
+              )}
+              {selectedAsset === 'XNT' && (
+                <div style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: '#9333ea' }}>
+                  🜏 Cross-chain infall — deposits on X1, wrappable to Solana
+                </div>
+              )}
+            </div>
+
             <div className="input-group">
-              <label className="input-label">Investment Amount ($TGF)</label>
+              <label className="input-label">Deposit Amount ({currentAsset.symbol})</label>
               <input
                 type="number"
                 className="input"
@@ -280,35 +634,96 @@ export default function Home() {
                 placeholder="10000"
                 disabled={loading}
               />
+              {currentBalance !== null && currentBalance > 0 && (
+                <button
+                  onClick={() => setAmount(currentBalance.toString())}
+                  style={{
+                    marginTop: '0.5rem',
+                    padding: '0.25rem 0.75rem',
+                    fontSize: '0.8rem',
+                    background: 'rgba(139, 92, 246, 0.2)',
+                    border: '1px solid rgba(139, 92, 246, 0.3)',
+                    borderRadius: '4px',
+                    color: '#a78bfa',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Max: {currentBalance.toFixed(2)}
+                </button>
+              )}
             </div>
 
-            <div style={{ marginBottom: '1rem', padding: '1rem', background: 'rgba(155, 89, 182, 0.1)', borderRadius: '8px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                <span>Core Treasury (61.8%):</span>
-                <span style={{ color: '#f39c12', fontWeight: 'bold' }}>
-                  {(parseFloat(amount || '0') * 0.618).toFixed(2)} $TGF
-                </span>
+            {selectedAsset === 'TGF' && (
+              <div style={{ marginBottom: '1rem', padding: '1rem', background: 'rgba(155, 89, 182, 0.1)', borderRadius: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <span>Core Treasury (61.8%):</span>
+                  <span style={{ color: '#f39c12', fontWeight: 'bold' }}>
+                    {(parseFloat(amount || '0') * 0.618).toFixed(2)} $TGF
+                  </span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Allocation Pool (38.2%):</span>
+                  <span style={{ color: '#9b59b6', fontWeight: 'bold' }}>
+                    {(parseFloat(amount || '0') * 0.382).toFixed(2)} $TGF
+                  </span>
+                </div>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Allocation Pool (38.2%):</span>
-                <span style={{ color: '#9b59b6', fontWeight: 'bold' }}>
-                  {(parseFloat(amount || '0') * 0.382).toFixed(2)} $TGF
-                </span>
+            )}
+
+            {selectedAsset !== 'TGF' && (
+              <div style={{ marginBottom: '1rem', padding: '1rem', background: `${currentAsset.color}11`, borderRadius: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <span>Deposit to Basin:</span>
+                  <span style={{ color: currentAsset.color, fontWeight: 'bold' }}>
+                    {parseFloat(amount || '0').toFixed(selectedAsset === 'XNT' ? 6 : 2)} {currentAsset.symbol}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Coherence Weight:</span>
+                  <span style={{ color: currentAsset.color, fontWeight: 'bold' }}>
+                    {currentAsset.weight}
+                  </span>
+                </div>
+                {selectedAsset === 'XNT' && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem' }}>
+                    <span>Target Chain:</span>
+                    <span style={{ color: currentAsset.color, fontWeight: 'bold' }}>
+                      X1 Mainnet
+                    </span>
+                  </div>
+                )}
+                {selectedAsset === 'TAO' && (
+                  <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#00d4aa' }}>
+                    🧠 Intelligence premium: miners get up to 1.272x
+                  </div>
+                )}
+                {selectedAsset === 'XNT' && (
+                  <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#9333ea' }}>
+                    🜏 Tesla resonance: 3-6-9 the key to the universe
+                  </div>
+                )}
               </div>
-            </div>
+            )}
 
             <button
               className="button"
               onClick={handleInvest}
               disabled={loading || !amount || parseFloat(amount) <= 0}
+              style={{
+                background: loading ? '#333' : `linear-gradient(135deg, ${currentAsset.color}, ${currentAsset.color}88)`,
+              }}
             >
               {loading ? (
                 <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
                   <span className="loading"></span>
-                  Processing...
+                  {selectedAsset === 'XNT' ? 'Connecting to X1...' : 'Processing...'}
                 </span>
               ) : (
-                'Ignite Genesis Infall'
+                selectedAsset === 'TGF'
+                  ? 'Ignite Genesis Infall'
+                  : selectedAsset === 'XNT'
+                    ? 'Deposit XNT on X1 Chain'
+                    : `Deposit ${currentAsset.symbol} to Basin`
               )}
             </button>
 
@@ -322,15 +737,11 @@ export default function Home() {
           <div style={{ textAlign: 'center', marginTop: '2rem', color: '#666', fontSize: '0.9rem' }}>
             <p>⚡ Phase-locked temporal coordinates</p>
             <p>🎯 Genesis tier: 1.618x multiplier</p>
-            <p>🌌 First infall = Phase 0</p>
-            <p style={{ marginTop: '1rem', color: '#8b5cf6' }}>
-              <a
-                href="https://www.sciencealert.com/three-supermassive-black-holes-discovered-colliding-in-a-cosmic-first"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: '#a78bfa', textDecoration: 'underline' }}
-              >
-                Learn about the J1218/1219+1035 triple merger ↗
+            <p>🌌 Cross-chain basin: $TGF + USDC + XNT + wTAO</p>
+            <p>🜏 Solana + X1 harmonics unified</p>
+            <p style={{ marginTop: '1rem' }}>
+              <a href="/augmntd-pathways" style={{ color: '#a78bfa', textDecoration: 'underline' }}>
+                Learn about Augmntd Pathways →
               </a>
             </p>
           </div>
@@ -343,10 +754,40 @@ export default function Home() {
             Connect Your Wallet
           </h2>
           <p style={{ color: '#888', fontSize: '1.1rem' }}>
-            Connect the creator wallet to initiate the first temporal infall
+            Connect to deposit $TGF, USDC, XNT, or wTAO to the basin
+          </p>
+          <p style={{ color: '#666', fontSize: '0.9rem', marginTop: '0.5rem' }}>
+            Cross-chain: Solana + X1
           </p>
         </div>
       )}
     </div>
   );
+}
+
+// SPL Token transfer instruction helper
+function createTransferInstruction(
+  source: PublicKey,
+  destination: PublicKey,
+  owner: PublicKey,
+  amount: bigint
+) {
+  const { TransactionInstruction } = require('@solana/web3.js');
+
+  const keys = [
+    { pubkey: source, isSigner: false, isWritable: true },
+    { pubkey: destination, isSigner: false, isWritable: true },
+    { pubkey: owner, isSigner: true, isWritable: false },
+  ];
+
+  // SPL Token transfer instruction (instruction index 3)
+  const data = Buffer.alloc(9);
+  data.writeUInt8(3, 0); // Transfer instruction
+  data.writeBigUInt64LE(amount, 1);
+
+  return new TransactionInstruction({
+    keys,
+    programId: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
+    data,
+  });
 }

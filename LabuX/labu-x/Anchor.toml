@@ -16,7 +16,7 @@ labu_x = "6rivJsodwyZj7JbeJNeLD4F7K4tzxMq9mkEDkRxge7u5"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "https://rpc.mainnet.x1.xyz"
+cluster = "https://api.mainnet-beta.solana.com"
 wallet = "/home/augmntd/.config/solana/xstake.json"
 
 [scripts]

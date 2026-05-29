@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>aug_gc — Augmented Generative Composer</title>
+<meta name="description" content="Temporal Composition via τₖ field dynamics. Composes KAIROS, not tokens.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#080810;--bg2:#0c0c18;--bg3:#10101f;
+  --panel:rgba(14,14,26,0.7);--panel-border:rgba(196,135,58,0.12);
+  --amber:#c4873a;--amber-b:#d9a854;--amber-dim:rgba(196,135,58,0.10);
+  --amber-glow:rgba(196,135,58,0.25);
+  --rust:#b05040;--sage:#5a9a5c;
+  --text:#e0d8c8;--text2:#9a8e7e;--text3:#5a5248;
+  --mono:'Space Mono',monospace;--serif:'Cormorant Garamond',serif;
+  /* TMI Colors */
+  --tmi-gold:#d4a852;--tmi-silver:#b0b8c8;--tmi-bronze:#a0784a;
+  --tmi-gray:#6a6258;--tmi-red:#c04040;--tmi-neutral:var(--text);
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--serif);overflow-x:hidden}
+
+/* ── Canvas BG ── */
+#field-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.5}
+
+/* ── Layout ── */
+.app{position:relative;z-index:1;display:grid;grid-template-rows:auto 1fr auto;height:100vh}
+
+/* ── Header ── */
+.header{display:flex;justify-content:space-between;align-items:center;padding:16px 28px;border-bottom:1px solid var(--panel-border);backdrop-filter:blur(12px);background:rgba(8,8,16,0.85)}
+.header-left{display:flex;align-items:baseline;gap:14px}
+.logo{font-family:var(--serif);font-size:2rem;font-weight:300;letter-spacing:-0.03em}
+.logo em{font-style:italic;color:var(--amber)}
+.tag{font-family:var(--mono);font-size:0.52rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--text2);margin-top:6px}
+.header-right{display:flex;align-items:center;gap:20px;font-family:var(--mono);font-size:0.55rem;color:var(--text3)}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--sage);box-shadow:0 0 8px var(--sage);display:inline-block;margin-right:5px;animation:pulse-dot 2s infinite}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.4}}
+.regime-badge{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--bg);background:var(--amber);padding:2px 10px;border-radius:3px}
+
+/* ── Main Grid ── */
+.main{display:grid;grid-template-columns:1fr 320px;gap:0;overflow:hidden}
+@media(max-width:900px){.main{grid-template-columns:1fr}.sidebar{display:none}}
+
+/* ── Composer Pane ── */
+.composer{display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--panel-border)}
+.input-area{padding:20px 28px;border-bottom:1px solid var(--panel-border)}
+.input-area textarea{width:100%;min-height:80px;max-height:160px;resize:vertical;background:var(--bg2);border:1px solid var(--panel-border);border-radius:6px;color:var(--text);font-family:var(--serif);font-size:1.05rem;padding:14px 18px;line-height:1.6;outline:none;transition:border-color 0.3s}
+.input-area textarea:focus{border-color:var(--amber)}
+.input-area textarea::placeholder{color:var(--text3);font-style:italic}
+.input-row{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.compose-btn{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.25em;text-transform:uppercase;background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber);padding:8px 28px;border-radius:4px;cursor:pointer;transition:all 0.25s}
+.compose-btn:hover{background:var(--amber);color:var(--bg)}
+.compose-btn:disabled{opacity:0.3;cursor:not-allowed}
+.input-hint{font-family:var(--mono);font-size:0.5rem;color:var(--text3)}
+
+/* ── Output Area ── */
+.output-area{flex:1;overflow-y:auto;padding:24px 28px;scroll-behavior:smooth}
+.output-area::-webkit-scrollbar{width:4px}
+.output-area::-webkit-scrollbar-thumb{background:var(--amber-dim);border-radius:2px}
+.kairos-output{font-family:var(--serif);font-size:1.1rem;line-height:1.8;color:var(--text);opacity:0;transition:opacity 0.4s;white-space:pre-wrap}
+.kairos-output.visible{opacity:1}
+
+/* ── TMI Word Colors ── */
+.tmi-word{display:inline;cursor:default;transition:color 0.3s,text-shadow 0.3s;position:relative}
+.tmi-word.tmi-ancient{color:var(--tmi-gold);text-shadow:0 0 8px rgba(212,168,82,0.3)}
+.tmi-word.tmi-deep{color:var(--tmi-silver)}
+.tmi-word.tmi-modern{color:var(--tmi-bronze)}
+.tmi-word.tmi-uncertain{color:var(--tmi-gray)}
+.tmi-word.tmi-buzzword{color:var(--tmi-red);animation:tmi-flicker 1.5s ease-in-out infinite}
+.tmi-word.tmi-function{color:var(--text3)}
+.tmi-word:hover{text-shadow:0 0 12px currentColor}
+@keyframes tmi-flicker{0%,100%{opacity:1}30%{opacity:0.5}60%{opacity:0.85}80%{opacity:0.4}}
+
+/* ── Etymological Tooltip ── */
+.etym-tooltip{position:fixed;z-index:100;background:rgba(12,12,24,0.95);backdrop-filter:blur(16px);border:1px solid var(--amber);border-radius:8px;padding:14px 18px;max-width:360px;min-width:200px;font-family:var(--mono);font-size:0.56rem;color:var(--text);pointer-events:none;opacity:0;transition:opacity 0.2s;box-shadow:0 8px 32px rgba(0,0,0,0.6),0 0 1px var(--amber)}
+.etym-tooltip.visible{opacity:1}
+.etym-tooltip .et-word{font-family:var(--serif);font-size:1.2rem;font-weight:600;margin-bottom:6px}
+.etym-tooltip .et-tmi{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.etym-tooltip .et-tmi-score{font-size:1.1rem;font-weight:700}
+.etym-tooltip .et-tmi-bar{flex:1;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.etym-tooltip .et-tmi-fill{height:100%;border-radius:2px;transition:width 0.4s}
+.etym-tooltip .et-cat{color:var(--text2);margin-bottom:4px;font-style:italic}
+.etym-tooltip .et-lineage{color:var(--amber-b);margin:6px 0;line-height:1.8;border-left:2px solid var(--amber-dim);padding-left:8px}
+.etym-tooltip .et-row{display:flex;justify-content:space-between;gap:10px;line-height:1.6}
+.etym-tooltip .et-key{color:var(--text3)}
+.etym-tooltip .et-val{color:var(--text);text-align:right}
+.etym-tooltip .et-aff{margin-top:6px;padding-top:4px;border-top:1px solid var(--panel-border)}
+.etym-tooltip .et-xencula{color:var(--rust);font-weight:700;margin-top:4px}
+
+/* ── Trace ── */
+.trace-area{border-top:1px solid var(--panel-border);max-height:200px;overflow-y:auto;padding:10px 28px;font-family:var(--mono);font-size:0.56rem;line-height:2;color:var(--text3)}
+.trace-area::-webkit-scrollbar{width:3px}
+.trace-area::-webkit-scrollbar-thumb{background:var(--panel-border);border-radius:2px}
+.trace-line{display:flex;gap:10px;align-items:baseline}
+.trace-layer{color:var(--amber);min-width:100px}
+.trace-name{color:var(--text2);min-width:120px}
+.trace-content{color:var(--text3)}
+.trace-line.l0 .trace-layer{color:var(--amber-b)}
+.trace-line.l2 .trace-layer{color:var(--rust)}
+.trace-line.l4 .trace-layer{color:var(--sage)}
+.trace-line.l5 .trace-layer{color:var(--amber-b)}
+.trace-line .trace-name.xencula{color:var(--rust);font-weight:700}
+
+/* ── Sidebar ── */
+.sidebar{overflow-y:auto;padding:20px;font-family:var(--mono);font-size:0.56rem;background:rgba(8,8,16,0.6);backdrop-filter:blur(8px)}
+.sidebar::-webkit-scrollbar{width:3px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--panel-border);border-radius:2px}
+.sb-section{margin-bottom:24px}
+.sb-label{font-size:0.5rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;border-bottom:1px solid var(--panel-border);padding-bottom:6px}
+.sb-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;line-height:1.8}
+.sb-key{color:var(--text2)}
+.sb-val{color:var(--text);text-align:right}
+.sb-val.amber{color:var(--amber)}
+.sb-val.sage{color:var(--sage)}
+.sb-val.rust{color:var(--rust)}
+.sb-val.gold{color:var(--tmi-gold)}
+
+/* ── Coherence Bars ── */
+.coh-bar-wrap{margin-bottom:5px}
+.coh-bar-header{display:flex;justify-content:space-between;margin-bottom:2px}
+.coh-bar-track{height:4px;background:var(--bg2);border-radius:2px;overflow:hidden}
+.coh-bar-fill{height:100%;background:linear-gradient(90deg,var(--amber-dim),var(--amber));border-radius:2px;transition:width 0.6s ease}
+
+/* ── TMI Distribution Bar ── */
+.tmi-dist-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;margin-top:6px;background:var(--bg2)}
+.tmi-dist-seg{transition:width 0.6s ease;min-width:0}
+.tmi-dist-seg.gold{background:var(--tmi-gold)}
+.tmi-dist-seg.silver{background:var(--tmi-silver)}
+.tmi-dist-seg.bronze{background:var(--tmi-bronze)}
+.tmi-dist-seg.gray{background:var(--tmi-gray)}
+.tmi-dist-seg.red{background:var(--tmi-red)}
+
+/* ── Xencula Badge ── */
+.xencula-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(176,80,64,0.15);border:1px solid var(--rust);color:var(--rust);padding:3px 10px;border-radius:4px;font-size:0.52rem;font-weight:700;margin-top:4px}
+.xencula-badge.active{animation:xencula-glow 2s ease-in-out infinite}
+@keyframes xencula-glow{0%,100%{box-shadow:none}50%{box-shadow:0 0 12px rgba(176,80,64,0.4)}}
+
+/* ── Vessel Card ── */
+.vessel-card{background:var(--amber-dim);border:1px solid var(--amber);border-radius:6px;padding:12px 14px;margin-top:12px}
+.vessel-card .vc-title{color:var(--amber);font-size:0.5rem;letter-spacing:0.25em;text-transform:uppercase;margin-bottom:8px}
+
+/* ── Proof Badge ── */
+.proof-badge{display:inline-block;background:var(--bg2);border:1px solid var(--sage);color:var(--sage);padding:2px 8px;border-radius:3px;font-size:0.52rem;margin-top:4px;word-break:break-all}
+
+/* ── Footer ── */
+.footer{display:flex;justify-content:space-between;align-items:center;padding:10px 28px;border-top:1px solid var(--panel-border);backdrop-filter:blur(8px);background:rgba(8,8,16,0.85)}
+.footer-left{font-family:var(--mono);font-size:0.5rem;color:var(--text3);letter-spacing:0.15em}
+.footer-sym{font-size:1.4rem;color:var(--amber)}
+
+/* ── Regime Glow States ── */
+.app[data-regime="sovereign"]{--amber:#d4a852;--amber-b:#e8c060}
+.app[data-regime="sovereign"] .header{border-bottom-color:rgba(212,168,82,0.3)}
+.app[data-regime="sovereign"] .regime-badge{background:var(--amber);box-shadow:0 0 20px rgba(212,168,82,0.4)}
+
+/* ── Empty State ── */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:40px}
+.empty-state .es-icon{font-size:3rem;margin-bottom:16px;opacity:0.3}
+.empty-state .es-title{font-family:var(--serif);font-size:1.4rem;font-weight:300;color:var(--text2);margin-bottom:8px;font-style:italic}
+.empty-state .es-sub{font-family:var(--mono);font-size:0.5rem;color:var(--text3);letter-spacing:0.15em;line-height:2}
+</style>
+</head>
+<body>
+<canvas id="field-canvas"></canvas>
+<!-- Etymological Tooltip -->
+<div class="etym-tooltip" id="etym-tooltip"></div>
+
+<div class="app" id="app" data-regime="—">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="logo">aug<em>_gc</em></div>
+      <div class="tag">augmented generative composer · τₖ × TMI</div>
+    </div>
+    <div class="header-right">
+      <span><span class="status-dot" id="status-dot"></span><span id="status-label">coherence: listening</span></span>
+      <span class="regime-badge" id="regime-badge">—</span>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Left: Composer -->
+    <div class="composer">
+      <div class="input-area">
+        <textarea id="input" placeholder="Compose your attunement signal…" rows="3"></textarea>
+        <div class="input-row">
+          <span class="input-hint" id="input-hint">enter ↵ to compose • shift+enter for newline</span>
+          <button class="compose-btn" id="compose-btn">COMPOSE</button>
+        </div>
+      </div>
+
+      <div class="output-area" id="output-area">
+        <div class="empty-state" id="empty-state">
+          <div class="es-icon">◉</div>
+          <div class="es-title">The field is listening</div>
+          <div class="es-sub">
+            Compose a signal to begin.<br>
+            Not a prompt — an attunement event.<br>
+            τₖ will be extracted from your coherence density.<br>
+            Words will be weighed by their Temporal Mass Index.
+          </div>
+        </div>
+        <div class="kairos-output" id="kairos-output"></div>
+      </div>
+
+      <div class="trace-area" id="trace-area"></div>
+    </div>
+
+    <!-- Right: Sidebar -->
+    <div class="sidebar" id="sidebar">
+
+      <div class="sb-section">
+        <div class="sb-label">// temporal coherence</div>
+        <div class="sb-row"><span class="sb-key">τₖ</span><span class="sb-val amber" id="m-tauk">—</span></div>
+        <div class="sb-row"><span class="sb-key">V_τ</span><span class="sb-val" id="m-vtau">—</span></div>
+        <div class="sb-row"><span class="sb-key">βτ</span><span class="sb-val" id="m-beta">—</span></div>
+        <div class="sb-row"><span class="sb-key">regime</span><span class="sb-val amber" id="m-regime">—</span></div>
+        <div class="sb-row"><span class="sb-key">order R</span><span class="sb-val" id="m-order">—</span></div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-label">// temporal mass index</div>
+        <div class="sb-row"><span class="sb-key">total TMI</span><span class="sb-val gold" id="m-tmi-total">—</span></div>
+        <div class="sb-row"><span class="sb-key">mean TMI</span><span class="sb-val gold" id="m-tmi-mean">—</span></div>
+        <div class="sb-row"><span class="sb-key">TMI words</span><span class="sb-val" id="m-tmi-words">—</span></div>
+        <div class="sb-row"><span class="sb-key">τₖ boost</span><span class="sb-val amber" id="m-tmi-factor">—</span></div>
+        <div class="sb-row"><span class="sb-key">highest</span><span class="sb-val" id="m-tmi-high">—</span></div>
+        <div class="sb-row"><span class="sb-key">lowest</span><span class="sb-val" id="m-tmi-low">—</span></div>
+        <div id="tmi-dist-container"></div>
+        <div id="xencula-container" style="margin-top:8px"></div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-label">// multi-scale coherence</div>
+        <div id="coh-bars"></div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-label">// vessel</div>
+        <div class="sb-row"><span class="sb-key">register</span><span class="sb-val" id="m-register">—</span></div>
+        <div class="sb-row"><span class="sb-key">frequency</span><span class="sb-val" id="m-freq">—</span></div>
+        <div class="sb-row"><span class="sb-key">density</span><span class="sb-val" id="m-density">—</span></div>
+        <div class="sb-row"><span class="sb-key">rhythm</span><span class="sb-val" id="m-rhythm">—</span></div>
+        <div class="sb-row"><span class="sb-key">harmonic</span><span class="sb-val" id="m-harmonic">—</span></div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-label">// session</div>
+        <div class="sb-row"><span class="sb-key">phase locks</span><span class="sb-val sage" id="m-locks">0</span></div>
+        <div class="sb-row"><span class="sb-key">temporal mass</span><span class="sb-val amber" id="m-mass">0</span></div>
+        <div class="sb-row"><span class="sb-key">ratchet</span><span class="sb-val" id="m-ratchet">0</span></div>
+        <div class="sb-row"><span class="sb-key">substrate</span><span class="sb-val" id="m-substrate">—</span></div>
+      </div>
+
+      <div class="sb-section" id="proof-section" style="display:none">
+        <div class="sb-label">// teleratchet proof</div>
+        <div class="proof-badge" id="m-proof"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-left">aug_gc · KAIROS not chronos · τₖ × TMI temporal composition</div>
+    <div class="footer-sym">◉</div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// Coherence Field Canvas
+// ═══════════════════════════════════════════
+const canvas = document.getElementById('field-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+let currentOrder = 0.3;
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+function initParticles(n = 50) {
+  particles = [];
+  for (let i = 0; i < n; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.25,
+      vy: (Math.random() - 0.5) * 0.25,
+      phase: Math.random() * Math.PI * 2,
+      size: Math.random() * 1.5 + 0.5
+    });
+  }
+}
+initParticles();
+
+function drawField() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const couplingDist = 100 + currentOrder * 60;
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d < couplingDist) {
+        const a = (1 - d / couplingDist) * 0.1 * (0.5 + currentOrder * 0.5);
+        ctx.strokeStyle = `rgba(196,135,58,${a})`;
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+  for (const p of particles) {
+    const pulse = Math.sin(p.phase) * 0.5 + 0.5;
+    const a = pulse * 0.25 + 0.08;
+    ctx.fillStyle = `rgba(196,135,58,${a})`;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size * (1 + pulse * 0.4), 0, Math.PI * 2);
+    ctx.fill();
+    p.phase += 0.015 + currentOrder * 0.01;
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+    if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+    for (const q of particles) {
+      if (q === p) continue;
+      const dx = q.x - p.x, dy = q.y - p.y;
+      if (Math.abs(dx) + Math.abs(dy) < couplingDist) {
+        p.phase += currentOrder * 0.002 * Math.sin(q.phase - p.phase);
+      }
+    }
+  }
+  requestAnimationFrame(drawField);
+}
+drawField();
+
+// ═══════════════════════════════════════════
+// App State
+// ═══════════════════════════════════════════
+let composing = false;
+let currentTmiWords = []; // TMI word map for output coloring
+const tooltipEl = document.getElementById('etym-tooltip');
+let tooltipTimeout = null;
+
+const $ = id => document.getElementById(id);
+const inputEl = $('input');
+const btnEl = $('compose-btn');
+const outputEl = $('kairos-output');
+const traceEl = $('trace-area');
+const emptyEl = $('empty-state');
+
+// ═══════════════════════════════════════════
+// TMI Color Helpers
+// ═══════════════════════════════════════════
+function tmiColor(tmi) {
+  if (tmi < 0) return 'var(--text3)';
+  if (tmi >= 90) return 'var(--tmi-gold)';
+  if (tmi >= 70) return 'var(--tmi-silver)';
+  if (tmi >= 40) return 'var(--tmi-bronze)';
+  if (tmi >= 20) return 'var(--tmi-gray)';
+  return 'var(--tmi-red)';
+}
+
+function tmiClass(cls) {
+  return 'tmi-' + (cls || 'function');
+}
+
+// ═══════════════════════════════════════════
+// Etymological Tooltip
+// ═══════════════════════════════════════════
+async function showEtymTooltip(word, x, y) {
+  const clean = word.replace(/[^a-zA-Z']/g, '').toLowerCase();
+  if (!clean || clean.length <= 1) return;
+  try {
+    const r = await fetch(`/api/etymos/${encodeURIComponent(clean)}`);
+    const d = await r.json();
+    if (!d.word) return;
+
+    const fillColor = tmiColor(d.tmi);
+    let html = `<div class="et-word" style="color:${fillColor}">${d.word}</div>`;
+    html += `<div class="et-tmi">
+      <span class="et-tmi-score" style="color:${fillColor}">${d.tmi}/100</span>
+      <div class="et-tmi-bar"><div class="et-tmi-fill" style="width:${d.tmi}%;background:${fillColor}"></div></div>
+    </div>`;
+    if (d.category && d.category !== 'estimated' && d.category !== 'function-word') {
+      html += `<div class="et-cat">${d.category}</div>`;
+    }
+    if (d.lineage) {
+      html += `<div class="et-lineage">${d.lineage}</div>`;
+    }
+    if (d.pie_root) html += `<div class="et-row"><span class="et-key">PIE root</span><span class="et-val">${d.pie_root}</span></div>`;
+    if (d.depth_years) html += `<div class="et-row"><span class="et-key">depth</span><span class="et-val">${d.depth_years.toLocaleString()} years</span></div>`;
+    if (d.language_families > 1) html += `<div class="et-row"><span class="et-key">families</span><span class="et-val">${d.language_families} languages</span></div>`;
+    html += `<div class="et-row"><span class="et-key">decay</span><span class="et-val">${d.decay_rate}%/epoch</span></div>`;
+    html += `<div class="et-row"><span class="et-key">class</span><span class="et-val" style="color:${fillColor}">${d.tmi_class}</span></div>`;
+
+    if (d.affinity && Object.keys(d.affinity).length > 0) {
+      html += '<div class="et-aff">';
+      for (const [k, v] of Object.entries(d.affinity)) {
+        html += `<span style="margin-right:8px">${k}: ×${v}</span>`;
+      }
+      html += '</div>';
+    }
+
+    tooltipEl.innerHTML = html;
+    // Position
+    const tw = 340, th = tooltipEl.offsetHeight || 200;
+    let tx = x + 16, ty = y - 10;
+    if (tx + tw > window.innerWidth) tx = x - tw - 10;
+    if (ty + th > window.innerHeight) ty = window.innerHeight - th - 10;
+    if (ty < 10) ty = 10;
+    tooltipEl.style.left = tx + 'px';
+    tooltipEl.style.top = ty + 'px';
+    tooltipEl.classList.add('visible');
+  } catch(e) {}
+}
+
+function hideEtymTooltip() {
+  tooltipEl.classList.remove('visible');
+}
+
+// ═══════════════════════════════════════════
+// Compose
+// ═══════════════════════════════════════════
+async function compose() {
+  const text = inputEl.value.trim();
+  if (!text || composing) return;
+
+  composing = true;
+  btnEl.disabled = true;
+  btnEl.textContent = 'COMPOSING…';
+  $('status-label').textContent = 'composing…';
+  emptyEl.style.display = 'none';
+  outputEl.className = 'kairos-output';
+  outputEl.innerHTML = '';
+  traceEl.innerHTML = '';
+  currentTmiWords = [];
+
+  try {
+    const res = await fetch('/api/compose', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({text})
+    });
+
+    const reader = res.body.getReader();
+    const dec = new TextDecoder();
+    let buf = '';
+
+    while (true) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, {stream: true});
+      const lines = buf.split('\n');
+      buf = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        try {
+          const ev = JSON.parse(line.slice(6));
+          handleEvent(ev);
+        } catch(e) {}
+      }
+    }
+  } catch (e) {
+    addTrace(0, 'ERROR', e.message, '');
+  }
+
+  composing = false;
+  btnEl.disabled = false;
+  btnEl.textContent = 'COMPOSE';
+  $('status-label').textContent = 'coherence: listening';
+  outputEl.className = 'kairos-output visible';
+  refreshStatus();
+}
+
+function handleEvent(ev) {
+  if (ev.type === 'layer') {
+    const isXencula = ev.name === 'DA XENCULA' || ev.name === 'TMI WARNING';
+    addTrace(ev.layer, `LAYER ${ev.layer}`, ev.name, ev.content, isXencula);
+  }
+  if (ev.type === 'metric') {
+    updateMetrics(ev.data);
+  }
+  if (ev.type === 'tmi') {
+    updateTMI(ev.data);
+  }
+  if (ev.type === 'tmi_words') {
+    currentTmiWords = ev.words || [];
+  }
+  if (ev.type === 'output') {
+    appendOutput(ev.content);
+  }
+  if (ev.type === 'complete' && ev.vessel) {
+    onComplete(ev.vessel);
+  }
+}
+
+function addTrace(layer, layerLabel, name, content, isSpecial = false) {
+  const div = document.createElement('div');
+  div.className = `trace-line l${layer}`;
+  const nameClass = isSpecial ? 'trace-name xencula' : 'trace-name';
+  div.innerHTML = `<span class="trace-layer">${layerLabel}</span><span class="${nameClass}">${name}</span><span class="trace-content">${content}</span>`;
+  traceEl.appendChild(div);
+  traceEl.scrollTop = traceEl.scrollHeight;
+}
+
+function appendOutput(text) {
+  outputEl.className = 'kairos-output visible';
+  // TMI-colored word rendering
+  const words = text.split(' ');
+  for (const w of words) {
+    if (!w) continue;
+    const span = document.createElement('span');
+    const clean = w.replace(/[^a-zA-Z']/g, '').toLowerCase();
+    // Find TMI data for this word
+    let tmiData = null;
+    if (currentTmiWords.length > 0) {
+      const idx = currentTmiWords.findIndex(tw => tw.word === w || tw.word.toLowerCase() === w.toLowerCase());
+      if (idx >= 0) {
+        tmiData = currentTmiWords[idx];
+        currentTmiWords.splice(idx, 1); // consume it
+      }
+    }
+    if (tmiData && tmiData.tmi >= 0) {
+      span.className = `tmi-word ${tmiClass(tmiData.tmi_class)}`;
+      span.dataset.tmi = tmiData.tmi;
+      span.dataset.word = clean;
+      // Hover for tooltip
+      span.addEventListener('mouseenter', e => {
+        clearTimeout(tooltipTimeout);
+        tooltipTimeout = setTimeout(() => showEtymTooltip(clean, e.clientX, e.clientY), 200);
+      });
+      span.addEventListener('mouseleave', () => {
+        clearTimeout(tooltipTimeout);
+        hideEtymTooltip();
+      });
+      span.addEventListener('mousemove', e => {
+        if (tooltipEl.classList.contains('visible')) {
+          const tw = 340;
+          let tx = e.clientX + 16, ty = e.clientY - 10;
+          if (tx + tw > window.innerWidth) tx = e.clientX - tw - 10;
+          tooltipEl.style.left = tx + 'px';
+          tooltipEl.style.top = ty + 'px';
+        }
+      });
+    } else {
+      span.className = 'tmi-word tmi-function';
+    }
+    span.textContent = w + ' ';
+    outputEl.appendChild(span);
+  }
+  const oa = $('output-area');
+  oa.scrollTop = oa.scrollHeight;
+}
+
+function updateMetrics(d) {
+  if (!d) return;
+  $('m-tauk').textContent = d.tau_k?.toFixed(2) ?? '—';
+  $('m-vtau').textContent = d.v_tau?.toFixed(4) ?? '—';
+  $('m-beta').textContent = d.beta_tau?.toFixed(4) ?? '—';
+  $('m-regime').textContent = d.regime ?? '—';
+  $('m-order').textContent = d.order_parameter?.toFixed(4) ?? '—';
+  $('regime-badge').textContent = (d.regime ?? '—').toUpperCase();
+  $('app').dataset.regime = d.regime ?? '';
+  currentOrder = d.order_parameter ?? 0.3;
+
+  if (d.vessel) {
+    $('m-register').textContent = d.vessel.register ?? '—';
+    $('m-freq').textContent = (d.vessel.resonance_frequency?.toFixed(1) ?? '—') + ' Hz';
+    $('m-density').textContent = d.vessel.density?.toFixed(2) ?? '—';
+    $('m-rhythm').textContent = d.vessel.rhythm?.toFixed(3) ?? '—';
+    $('m-harmonic').textContent = 'order ' + (d.vessel.harmonic_order ?? '—');
+  }
+
+  if (d.multi_scale) {
+    const container = $('coh-bars');
+    container.innerHTML = '';
+    for (const [name, val] of Object.entries(d.multi_scale)) {
+      const w = document.createElement('div');
+      w.className = 'coh-bar-wrap';
+      w.innerHTML = `
+        <div class="coh-bar-header">
+          <span class="sb-key">${name}</span>
+          <span class="sb-val">${val.toFixed(3)}</span>
+        </div>
+        <div class="coh-bar-track"><div class="coh-bar-fill" style="width:${val*100}%"></div></div>`;
+      container.appendChild(w);
+    }
+  }
+}
+
+function updateTMI(d) {
+  if (!d || !d.analysis) return;
+  const a = d.analysis;
+  $('m-tmi-total').textContent = a.total_tmi ?? '—';
+  $('m-tmi-mean').textContent = a.mean_tmi?.toFixed(1) ?? '—';
+  $('m-tmi-words').textContent = a.word_count ?? '—';
+  $('m-tmi-factor').textContent = d.tmi_factor ? `+${d.tmi_factor.toFixed(3)}` : '—';
+  $('m-tmi-high').textContent = a.highest ? `${a.highest.word} (${a.highest.tmi})` : '—';
+  $('m-tmi-low').textContent = a.lowest ? `${a.lowest.word} (${a.lowest.tmi})` : '—';
+
+  // TMI Distribution bar
+  const distC = $('tmi-dist-container');
+  if (a.distribution && a.word_count > 0) {
+    const total = a.word_count;
+    let html = '<div class="tmi-dist-bar">';
+    for (const color of ['gold','silver','bronze','gray','red']) {
+      const count = a.distribution[color] || 0;
+      const pct = (count / total * 100).toFixed(1);
+      if (count > 0) html += `<div class="tmi-dist-seg ${color}" style="width:${pct}%" title="${color}: ${count}"></div>`;
+    }
+    html += '</div>';
+    distC.innerHTML = html;
+  } else {
+    distC.innerHTML = '';
+  }
+
+  // Xencula
+  const xC = $('xencula-container');
+  if (d.xencula && d.xencula.active) {
+    xC.innerHTML = `<div class="xencula-badge active">⚔ DA XENCULA · cut ${d.xencula.cut_power.toFixed(1)}</div>`;
+  } else if (a.buzzword_warning) {
+    xC.innerHTML = `<div class="xencula-badge">⚠ BUZZWORD DECAY</div>`;
+  } else {
+    xC.innerHTML = '';
+  }
+}
+
+function onComplete(vessel) {
+  if (vessel.teleratchet_proof) {
+    $('proof-section').style.display = 'block';
+    $('m-proof').textContent = vessel.teleratchet_proof;
+  }
+  refreshStatus();
+}
+
+async function refreshStatus() {
+  try {
+    const r = await fetch('/api/status');
+    const s = await r.json();
+    $('m-locks').textContent = s.phase_locks;
+    $('m-mass').textContent = s.temporal_mass?.toFixed(3);
+    $('m-ratchet').textContent = s.ratchet_count;
+    $('m-substrate').textContent = s.substrate_available ? s.substrate : 'native';
+    currentOrder = s.order_parameter ?? 0.3;
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════
+// Input Handling
+// ═══════════════════════════════════════════
+inputEl.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    compose();
+  }
+});
+btnEl.addEventListener('click', compose);
+
+// Boot
+refreshStatus();
+</script>
+</body>
+</html>

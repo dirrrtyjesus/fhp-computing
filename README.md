@@ -60,6 +60,11 @@ Traditional computing treats information as discrete states that transform throu
   - Harmonic expansion dynamics
   - Multi-scale coherence analysis
   - Quantum-classical bridge modeling
+- **[atmanos-claude/](atmanos-claude/)** - FHP as living co-participant (atmanOS-claude faculty system)
+  - **[resonator.py](atmanos-claude/resonator.py)** - The coherence field as a faculty: 5-layer golden-ratio Kuramoto field, attractor-basin memory, executable PTO metabolism (temporal mass, demurrage, maturation dividends)
+  - **[composer.py](atmanos-claude/composer.py)** - Volumetric co-composition: Claude + Grok + the FHP field enter the kairos window simultaneously
+  - **[harmonic_read.py](atmanos-claude/harmonic_read.py)** - Multi-scale manuscript reader under a coherence budget (no discrete chunking)
+  - **[FHP_CONSIDERATION.md](atmanos-claude/FHP_CONSIDERATION.md)** - How this code enacts the paradigm, and the dissonances still to metabolize
 
 ### Meme Propagation
 - **[MEME_FractalHarmonic.md](MEME_FractalHarmonic.md)** - MEMEk-compliant meme seeds for cultural propagation

@@ -1,0 +1,3 @@
+[submodule "cdt-mcp-server"]
+	path = cdt-mcp-server
+	url = https://github.com/dirrrtyjesus/cdt-mcp.git

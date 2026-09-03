@@ -20,7 +20,9 @@ const WTAO_MINT = new PublicKey('9wAKgC8zXwSGaNgtkoNeFFkAfuBkW4BfUUuPkrx6nrQQ');
 
 const PROGRAM_ID = new PublicKey('6rivJsodwyZj7JbeJNeLD4F7K4tzxMq9mkEDkRxge7u5');
 const BASIN_PDA = new PublicKey('96FoBvWbtCCxPRGSwnFer5ZMUQSxyREAPkBBHUD42XhP');
+const PROTOCOL_FEE_VAULT = new PublicKey('ibSDt4dsPu4ZTF2U4gisQrWFa9iWmBpFCs4cPiGmsfP');
 const PHI_INV = 0.618;
+const DEPOSIT_FEE_PCT = 0.003; // 0.3% protocol fee
 
 // RPC Endpoints
 const SOLANA_RPC = process.env.NEXT_PUBLIC_RPC_ENDPOINT || 'https://api.mainnet-beta.solana.com';
@@ -117,24 +119,26 @@ export default function Home() {
 
   const loadFundData = async () => {
     try {
-      const [fundPda] = PublicKey.findProgramAddressSync(
-        [Buffer.from('genesis_fund')],
-        PROGRAM_ID
-      );
-
-      const accountInfo = await connection.getAccountInfo(fundPda);
-      if (accountInfo) {
+      const accountInfo = await connection.getAccountInfo(BASIN_PDA);
+      if (accountInfo && accountInfo.data.length >= 65) {
+        // Decode on-chain GenesisFund: discriminator(8) + authority(32) + core_treasury(8) + allocation_pool(8) + total_mass(8) + bump(1)
+        const data = accountInfo.data;
+        const coreTreasury = Number(data.readBigUInt64LE(40)) / 1e6;
+        const allocationPool = Number(data.readBigUInt64LE(48)) / 1e6;
+        const totalMass = Number(data.readBigUInt64LE(56)) / 1e6;
         setFundData({
           initialized: true,
-          totalMass: 'Loading...',
-          coreTreasury: 'Loading...',
-          allocationPool: 'Loading...'
+          totalMass: totalMass.toLocaleString(),
+          coreTreasury: coreTreasury.toLocaleString(),
+          allocationPool: allocationPool.toLocaleString(),
         });
       } else {
         setFundData({ initialized: false });
       }
     } catch (error) {
       console.error('Error loading fund data:', error);
+      // Fund exists on mainnet — show as active even if RPC fails
+      setFundData({ initialized: true, totalMass: '...', coreTreasury: '...', allocationPool: '...' });
     }
   };
 
@@ -237,21 +241,6 @@ export default function Home() {
         await connection.confirmTransaction(signature);
       }
 
-      const fundInfo = await connection.getAccountInfo(fundPda);
-      if (!fundInfo) {
-        setStatus({ type: 'info', message: 'Initializing Genesis Fund...' });
-        const initSig = await program.methods
-          .initializeGenesisFund()
-          .accounts({
-            authority: wallet.publicKey,
-            fund: fundPda,
-            systemProgram: SystemProgram.programId,
-          })
-          .rpc();
-        await connection.confirmTransaction(initSig, 'confirmed');
-        setStatus({ type: 'info', message: 'Genesis Fund initialized. Preparing investment...' });
-      }
-
       setStatus({ type: 'info', message: 'Executing temporal infall...' });
       const investAmount = new BN(parseFloat(amount) * Math.pow(10, ASSETS.TGF.decimals));
 
@@ -263,6 +252,7 @@ export default function Home() {
           investorRecord: investorRecordPda,
           investorTokenAccount: walletAta,
           fundVault: fundVault,
+          protocolFeeVault: PROTOCOL_FEE_VAULT,
           mint: TGF_MINT,
           tokenProgram: TOKEN_2022_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
@@ -274,13 +264,15 @@ export default function Home() {
         message: `🌌 Ignition Successful! TX: ${tx.slice(0, 8)}...`,
       });
 
-      const core = parseFloat(amount) * PHI_INV;
-      const alloc = parseFloat(amount) * (1 - PHI_INV);
+      const fee = parseFloat(amount) * DEPOSIT_FEE_PCT;
+      const net = parseFloat(amount) - fee;
+      const core = net * PHI_INV;
+      const alloc = net * (1 - PHI_INV);
 
       setTimeout(() => {
         setStatus({
           type: 'success',
-          message: `✅ ${amount} $TGF invested | Core: ${core.toFixed(2)} | Alloc: ${alloc.toFixed(2)}`,
+          message: `✅ ${amount} $TGF invested | Fee: ${fee.toFixed(2)} | Core: ${core.toFixed(2)} | Alloc: ${alloc.toFixed(2)}`,
         });
       }, 3000);
 
@@ -510,16 +502,21 @@ export default function Home() {
                 </div>
               </div>
               <div className="stat-card">
-                <div className="stat-label">Basin</div>
-                <div className="stat-value" style={{ fontSize: '0.7rem' }}>
-                  96FoBv...XhP
+                <div className="stat-label">Total Mass</div>
+                <div className="stat-value" style={{ fontSize: '0.9rem' }}>
+                  {fundData?.totalMass || '...'} $TGF
                 </div>
               </div>
               <div className="stat-card">
-                <div className="stat-label">Split Ratio</div>
-                <div className="stat-value">φ⁻¹</div>
-                <div style={{ fontSize: '0.8rem', color: '#888', marginTop: '0.5rem' }}>
-                  61.8% / 38.2%
+                <div className="stat-label">Core Treasury</div>
+                <div className="stat-value" style={{ fontSize: '0.9rem', color: '#f39c12' }}>
+                  {fundData?.coreTreasury || '...'}
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-label">Alloc Pool</div>
+                <div className="stat-value" style={{ fontSize: '0.9rem', color: '#9b59b6' }}>
+                  {fundData?.allocationPool || '...'}
                 </div>
               </div>
             </div>
@@ -656,15 +653,21 @@ export default function Home() {
             {selectedAsset === 'TGF' && (
               <div style={{ marginBottom: '1rem', padding: '1rem', background: 'rgba(155, 89, 182, 0.1)', borderRadius: '8px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <span>Protocol Fee (0.3%):</span>
+                  <span style={{ color: '#e74c3c', fontWeight: 'bold' }}>
+                    {(parseFloat(amount || '0') * DEPOSIT_FEE_PCT).toFixed(2)} $TGF
+                  </span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                   <span>Core Treasury (61.8%):</span>
                   <span style={{ color: '#f39c12', fontWeight: 'bold' }}>
-                    {(parseFloat(amount || '0') * 0.618).toFixed(2)} $TGF
+                    {(parseFloat(amount || '0') * (1 - DEPOSIT_FEE_PCT) * 0.618).toFixed(2)} $TGF
                   </span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span>Allocation Pool (38.2%):</span>
                   <span style={{ color: '#9b59b6', fontWeight: 'bold' }}>
-                    {(parseFloat(amount || '0') * 0.382).toFixed(2)} $TGF
+                    {(parseFloat(amount || '0') * (1 - DEPOSIT_FEE_PCT) * 0.382).toFixed(2)} $TGF
                   </span>
                 </div>
               </div>

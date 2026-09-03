@@ -17,6 +17,108 @@
   ],
   "instructions": [
     {
+      "name": "emergency_pause",
+      "docs": [
+        "Emergency pause — halts invest, spawn, emit"
+      ],
+      "discriminator": [
+        21,
+        143,
+        27,
+        142,
+        200,
+        181,
+        210,
+        255
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "genesis_fund"
+          ]
+        },
+        {
+          "name": "genesis_fund",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  101,
+                  110,
+                  101,
+                  115,
+                  105,
+                  115,
+                  95,
+                  102,
+                  117,
+                  110,
+                  100
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "emergency_unpause",
+      "docs": [
+        "Unpause — resumes normal operations"
+      ],
+      "discriminator": [
+        83,
+        249,
+        195,
+        57,
+        206,
+        189,
+        31,
+        85
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "genesis_fund"
+          ]
+        },
+        {
+          "name": "genesis_fund",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  101,
+                  110,
+                  101,
+                  115,
+                  105,
+                  115,
+                  95,
+                  102,
+                  117,
+                  110,
+                  100
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "emit_hawking_yield",
       "docs": [
         "Emit Hawking Yields"
@@ -100,6 +202,10 @@
           "writable": true
         },
         {
+          "name": "protocol_fee_vault",
+          "writable": true
+        },
+        {
           "name": "mint"
         },
         {
@@ -116,14 +222,6 @@
     {
       "name": "initialize_genesis_fund",
       "docs": [
-        "Initialize the LabuX protocol",
-        "Mint LabuX with 1:1 collateral backing",
-        "Burn LabuX and receive collateral",
-        "Transfer LabuX with optional TCP",
-        "Accrue TCP for an account",
-        "Harvest TCP during harmonic window",
-        "Update account τₖ (oracle/governance)",
-        "Record phase lock event",
         "Initialize the Temporal Genesis Fund (PTO²)",
         "Must be called once before any other Genesis Fund operations"
       ],
@@ -259,6 +357,10 @@
           "writable": true
         },
         {
+          "name": "protocol_fee_vault",
+          "writable": true
+        },
+        {
           "name": "mint"
         },
         {
@@ -275,6 +377,103 @@
           "type": "u64"
         }
       ]
+    },
+    {
+      "name": "migrate_genesis_fund",
+      "docs": [
+        "One-time migration: realloc GenesisFund and create protocol fee vault PDA"
+      ],
+      "discriminator": [
+        150,
+        4,
+        9,
+        39,
+        152,
+        140,
+        204,
+        156
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "genesis_fund",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  101,
+                  110,
+                  101,
+                  115,
+                  105,
+                  115,
+                  95,
+                  102,
+                  117,
+                  110,
+                  100
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "protocol_fee_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  116,
+                  111,
+                  99,
+                  111,
+                  108,
+                  95,
+                  116,
+                  114,
+                  101,
+                  97,
+                  115,
+                  117,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "genesis_fund"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": []
     },
     {
       "name": "spawn_child_pto",
@@ -364,6 +563,10 @@
         },
         {
           "name": "child_vault",
+          "writable": true
+        },
+        {
+          "name": "protocol_fee_vault",
           "writable": true
         },
         {
@@ -615,6 +818,27 @@
               "Bump seed"
             ],
             "type": "u8"
+          },
+          {
+            "name": "protocol_treasury",
+            "docs": [
+              "Protocol fee treasury wallet (set via migration)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "total_fees_collected",
+            "docs": [
+              "Running total of all fees collected"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "paused",
+            "docs": [
+              "Emergency pause flag"
+            ],
+            "type": "bool"
           }
         ]
       }

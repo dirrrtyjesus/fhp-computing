@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ћ-HAL · augmntd LLC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=Libre+Franklin:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=Libre+Franklin:wght@300;400;600;700&display=swap');
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --paper:      #f7f5f0;
+      --paper-warm: #ede9e0;
+      --ink:        #1a1814;
+      --ink-mid:    #3a3630;
+      --ink-dim:    #7a7268;
+      --ink-ghost:  #b8b0a0;
+      --rule:       rgba(26,24,20,0.12);
+      --rule-heavy: rgba(26,24,20,0.25);
+
+      --charge:     #1a3a6a;
+      --charge-dim: rgba(26,58,106,0.08);
+      --charge-mid: rgba(26,58,106,0.55);
+
+      --debt:       #6a1a1a;
+      --debt-dim:   rgba(106,26,26,0.07);
+
+      --signal:     #1a5a3a;
+      --signal-dim: rgba(26,90,58,0.07);
+
+      --amber:      #8a5a10;
+      --amber-dim:  rgba(138,90,16,0.08);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Libre Baskerville', serif;
+      min-height: 100vh;
+      line-height: 1.65;
+      background-image: 
+        radial-gradient(circle at 1px 1px, rgba(26,24,20,0.035) 1px, transparent 0);
+      background-size: 20px 20px;
+    }
+
+    .hal-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+    @media (max-width: 860px) {
+      .hal-container { padding: 0 20px; }
+    }
+
+    /* Masthead — TMP language */
+    .masthead {
+      padding: 48px 0 32px;
+      border-bottom: 1px solid var(--rule-heavy);
+    }
+    .masthead-kicker {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.42em;
+      color: var(--charge);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .masthead-kicker::after {
+      content: ''; flex: 1; height: 1px; background: var(--charge); opacity: 0.28;
+    }
+    .masthead-title {
+      font-family: 'Libre Franklin', sans-serif;
+      font-size: clamp(2.1rem, 5.2vw, 2.85rem);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 0.96;
+      color: var(--ink);
+    }
+    .masthead-title span { color: var(--charge); }
+    .masthead-sub {
+      font-family: 'Libre Franklin', sans-serif;
+      font-size: 1.02rem;
+      font-weight: 300;
+      color: var(--ink-dim);
+      margin-top: 8px;
+      letter-spacing: -0.005em;
+    }
+
+    /* Live status strip */
+    .status-strip {
+      display: flex; align-items: center; gap: 18px;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--rule);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+    }
+    .status-pill {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 1px 11px;
+      border: 1px solid var(--rule-heavy);
+      border-radius: 999px;
+      color: var(--ink-mid);
+    }
+    .status-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      box-shadow: 0 0 0 2.5px var(--paper);
+    }
+    .status-dot.phase-locked { background: var(--signal); }
+    .status-dot.converging   { background: var(--amber); }
+    .status-dot.decoherent   { background: var(--debt); }
+
+    /* Metrics bar — refined TMP cards */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(138px, 1fr));
+      gap: 1px;
+      background: var(--rule);
+      margin: 22px 0 24px;
+      border: 1px solid var(--rule);
+    }
+    .metric {
+      background: #fff;
+      padding: 16px 20px;
+      display: flex; flex-direction: column;
+      gap: 3px;
+    }
+    .metric-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.58rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--ink-ghost);
+    }
+    .metric-value {
+      font-family: 'Libre Franklin', sans-serif;
+      font-size: 1.38rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: var(--ink);
+      line-height: 1;
+    }
+    .metric-value .unit { font-size: 0.68rem; font-weight: 400; color: var(--ink-dim); margin-left: 4px; }
+    .metric-value.signal { color: var(--signal); }
+    .metric-value.charge { color: var(--charge); }
+    .metric-value.amber  { color: var(--amber); }
+
+    /* Panels */
+    .panel {
+      background: #fff;
+      border: 1px solid var(--rule);
+      display: flex; flex-direction: column;
+    }
+    .panel-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 11px 18px;
+      background: var(--paper-warm);
+      border-bottom: 1px solid var(--rule);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+    }
+    .panel-body { padding: 18px; flex: 1; }
+
+    .section-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.58rem;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--ink-ghost);
+      margin-bottom: 12px;
+    }
+
+    /* Glyph keyboard — TMP tactile */
+    .glyph-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 5px;
+    }
+    .glyph-btn {
+      aspect-ratio: 1;
+      border: 1px solid var(--rule);
+      background: var(--paper);
+      font-family: 'Libre Baskerville', serif;
+      font-size: 21px;
+      color: var(--ink-mid);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: all 0.1s ease;
+      border-radius: 1px;
+    }
+    .glyph-btn:hover {
+      border-color: var(--charge);
+      background: var(--charge-dim);
+      color: var(--charge);
+      transform: translateY(-1px);
+    }
+    .glyph-btn.key {
+      border-color: var(--charge);
+      color: var(--charge);
+      font-weight: 600;
+    }
+    .glyph-btn.ground {
+      border-color: var(--debt);
+      color: var(--debt);
+      font-weight: 700;
+    }
+    .glyph-btn.buffer {
+      border-color: var(--amber);
+      color: var(--amber);
+    }
+    .glyph-btn.active {
+      background: var(--charge);
+      color: #fff;
+      border-color: var(--charge);
+    }
+
+    .glyph-inspector {
+      margin-top: 14px;
+      padding: 14px 16px;
+      background: var(--paper-warm);
+      border: 1px solid var(--rule);
+      font-size: 0.95rem;
+      line-height: 1.55;
+      min-height: 68px;
+    }
+    .glyph-inspector .g-name {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      color: var(--charge);
+      margin-bottom: 2px;
+    }
+    .glyph-inspector .g-desc { color: var(--ink-mid); }
+
+    /* Editor */
+    .code-editor {
+      width: 100%;
+      height: 312px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13.2px;
+      line-height: 1.72;
+      color: var(--ink);
+      background: #fdfcf8;
+      border: 1px solid var(--rule);
+      padding: 16px 18px;
+      resize: vertical;
+      outline: none;
+      tab-size: 2;
+    }
+    .code-editor:focus {
+      border-color: var(--charge-mid);
+    }
+
+    /* Canvas containers */
+    .viz {
+      background: #fdfcf8;
+      border: 1px solid var(--rule);
+      position: relative;
+      overflow: hidden;
+    }
+    .viz-label {
+      position: absolute; top: 10px; right: 14px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      color: var(--ink-ghost);
+      letter-spacing: 0.1em;
+      pointer-events: none;
+    }
+
+    /* Controls */
+    .ctrl-row { display: flex; gap: 10px; }
+    .ctrl-btn {
+      flex: 1;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 12px 14px;
+      border: 1px solid var(--rule-heavy);
+      background: #fff;
+      color: var(--ink-mid);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border-radius: 1px;
+    }
+    .ctrl-btn:hover { background: var(--paper-warm); }
+    .ctrl-btn.active {
+      background: var(--debt);
+      color: #fff;
+      border-color: var(--debt);
+    }
+    .ctrl-btn.primary {
+      background: var(--charge);
+      color: #fff;
+      border-color: var(--charge);
+    }
+    .ctrl-btn.primary:hover { filter: brightness(1.08); }
+    .ctrl-btn:disabled { opacity: 0.5; cursor: wait; }
+
+    .slider-wrap {
+      display: flex; flex-direction: column; gap: 7px;
+    }
+    .slider-label {
+      display: flex; justify-content: space-between;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      color: var(--ink-dim);
+      letter-spacing: 0.12em;
+    }
+    input[type="range"] {
+      accent-color: var(--charge);
+      width: 100%;
+    }
+
+    /* Compiler console — TMP trace aesthetic */
+    .console {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12.2px;
+      line-height: 1.82;
+      background: #fdfcf8;
+      padding: 14px 18px;
+      height: 198px;
+      overflow-y: auto;
+      border: 1px solid var(--rule);
+    }
+    .log-line {
+      display: flex; gap: 10px;
+      margin-bottom: 1px;
+    }
+    .log-num { color: var(--ink-ghost); width: 22px; flex-shrink: 0; text-align: right; }
+    .log-kind { font-weight: 500; }
+    .log-ok    { color: var(--signal); }
+    .log-warn  { color: var(--debt); }
+    .log-pay   { color: var(--amber); }
+    .log-done  { color: var(--charge); font-weight: 600; }
+    .log-info  { color: var(--ink-dim); }
+
+    /* Bidirectional rail */
+    .rail {
+      background: var(--paper-warm);
+      border: 1px solid var(--rule);
+      padding: 20px 22px;
+      display: flex; flex-direction: column; gap: 15px;
+    }
+    .rail-flow {
+      display: flex; align-items: center; gap: 8px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      flex-wrap: wrap;
+    }
+    .rail-node {
+      padding: 3px 10px;
+      border: 1px solid;
+      white-space: nowrap;
+    }
+    .rail-node.dev   { border-color: var(--amber); color: var(--amber); }
+    .rail-node.x1    { border-color: var(--charge); color: var(--charge); }
+    .rail-node.yield { border-color: var(--signal); color: var(--signal); font-weight: 600; }
+
+    .yield-value {
+      font-family: 'Libre Franklin', sans-serif;
+      font-size: 1.85rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: var(--signal);
+      line-height: 1;
+    }
+    .yield-value .unit { font-size: 0.8rem; font-weight: 400; color: var(--ink-dim); }
+
+    /* Compliance footer */
+    .compliance {
+      margin-top: 32px;
+      padding-top: 18px;
+      border-top: 1px solid var(--rule);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      color: var(--ink-dim);
+      display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px;
+    }
+    .compliance .axiom {
+      color: var(--charge);
+      font-weight: 600;
+    }
+
+    .rule-thin { height: 1px; background: var(--rule); margin: 24px 0; }
+
+    .empty { color: var(--ink-ghost); font-style: italic; }
+  </style>
+</head>
+<body>
+  <div class="hal-container">
+    <!-- MASTHEAD -->
+    <div class="masthead">
+      <div>
+        <div class="masthead-kicker">
+          AUGMNTD LLC · NON-EXTRACTIVE RESONANCE COMPUTE
+        </div>
+        <div class="masthead-title">Ћ<span>-HAL</span></div>
+        <div class="masthead-sub">Harmonic Assembly Language · v1.0-Alpha · Phase-Lock Axiom</div>
+      </div>
+    </div>
+
+    <!-- LIVE STATUS -->
+    <div class="status-strip">
+      <div style="display:flex;align-items:center;gap:9px;">
+        <span id="phase-dot" class="status-dot phase-locked"></span>
+        <span id="phase-text" style="color:var(--ink-mid);font-weight:500;">PHASE-LOCKED</span>
+      </div>
+      <div style="color:var(--ink-ghost);">·</div>
+      <div>X1 MAINNET · daDMVbreath / <span style="color:var(--signal);">$THERAPY</span></div>
+      <div style="color:var(--ink-ghost);">·</div>
+      <div id="r-value" style="font-weight:600;color:var(--charge);">R = 0.000</div>
+      <div style="margin-left:auto; color:var(--ink-ghost);">1 glyph = 1 operation · deterministic temporal mass</div>
+    </div>
+
+    <!-- METRICS -->
+    <div class="metrics">
+      <div class="metric"><div class="metric-label">Coherence (R)</div><div id="m-r" class="metric-value charge">0.000</div></div>
+      <div class="metric"><div class="metric-label">Coupling (К)</div><div id="m-k" class="metric-value charge">62<span class="unit">%</span></div></div>
+      <div class="metric"><div class="metric-label">Qubit Lattice</div><div class="metric-value">64<span class="unit">ch</span></div></div>
+      <div class="metric"><div class="metric-label">Base Frequency</div><div class="metric-value amber">936<span class="unit">MHz</span></div></div>
+      <div class="metric"><div class="metric-label">Attunement Events</div><div id="m-events" class="metric-value">0</div></div>
+      <div class="metric"><div class="metric-label">$THERAPY Yielded</div><div id="m-therapy" class="metric-value signal">0.0000</div></div>
+    </div>
+
+    <!-- MAIN 2-COLUMN AREA -->
+    <div style="display:grid; grid-template-columns: 1.12fr 1fr; gap:1px; background:var(--rule);">
+      
+      <!-- LEFT: EDITOR + GLYPH PALETTE -->
+      <div style="display:flex; flex-direction:column; gap:1px; background:var(--rule);">
+        
+        <!-- Editor -->
+        <div class="panel">
+          <div class="panel-head">
+            <span>resonance.hal — editor</span>
+            <button id="compile-btn"
+                    style="font-family:'IBM Plex Mono',monospace;font-size:0.68rem;letter-spacing:0.14em;padding:6px 15px;border:1px solid var(--charge);background:var(--charge);color:#fff;cursor:pointer;">
+              ▸ COMPILE + PHASE-LOCK
+            </button>
+          </div>
+          <div class="panel-body" style="padding:0;">
+            <textarea id="editor" class="code-editor" spellcheck="false"></textarea>
+          </div>
+        </div>
+
+        <!-- Glyph Palette -->
+        <div class="panel">
+          <div class="panel-head">
+            <span>Serbian Cyrillic ISA · 30-token instruction set</span>
+          </div>
+          <div class="panel-body" style="padding:16px 16px 8px;">
+            <div id="glyph-grid" class="glyph-grid"></div>
+
+            <div id="glyph-inspector" class="glyph-inspector">
+              <div class="empty">Hover a glyph to inspect its resonant opcode. Click to insert into editor.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: VISUALIZATIONS + CONTROLS -->
+      <div style="display:flex; flex-direction:column; gap:1px; background:var(--rule);">
+        
+        <!-- Coherence Field -->
+        <div class="panel">
+          <div class="panel-head">
+            <span>64-qubit coherence field · Kuramoto lattice</span>
+            <span id="field-r" style="font-family:'IBM Plex Mono',monospace;font-size:0.68rem;color:var(--ink-ghost);">R = 0.000</span>
+          </div>
+          <div class="panel-body" style="padding:0;position:relative;">
+            <div class="viz" style="height:232px;">
+              <canvas id="field-canvas" style="width:100%;height:100%;display:block;"></canvas>
+              <div class="viz-label">order parameter R</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Oscilloscope -->
+        <div class="panel">
+          <div class="panel-head">
+            <span>phase-lock oscilloscope</span>
+          </div>
+          <div class="panel-body" style="padding:0;">
+            <div class="viz" style="height:108px;">
+              <canvas id="scope-canvas" style="width:100%;height:100%;display:block;"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="panel">
+          <div class="panel-head"><span>field controls</span></div>
+          <div class="panel-body">
+            <div class="slider-wrap">
+              <div class="slider-label">
+                <span>Coupling Strength · К (СПРЕЗАЊЕ)</span>
+                <span id="coupling-val" style="color:var(--charge);font-weight:600;">62%</span>
+              </div>
+              <input type="range" id="coupling-slider" min="0" max="100" value="62">
+            </div>
+
+            <div class="ctrl-row" style="margin-top:16px;">
+              <button id="ground-btn" class="ctrl-btn">Џ INVOKE FRICTION COLLAPSE</button>
+              <button id="run-btn" class="ctrl-btn primary">❚❚ PAUSE FIELD</button>
+            </div>
+            <div style="margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:var(--ink-ghost);letter-spacing:0.06em;">
+              Џ collapses phase friction and forces symmetry across the lattice.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- BOTTOM: CONSOLE + RAIL -->
+    <div style="display:grid; grid-template-columns: 1.55fr 1fr; gap:1px; background:var(--rule); margin-top:1px;">
+      
+      <!-- Compiler Trace -->
+      <div class="panel">
+        <div class="panel-head">
+          <span>compiler console · execution trace</span>
+          <span style="font-size:0.58rem;color:var(--ink-ghost);">stdout</span>
+        </div>
+        <div id="console" class="console"></div>
+      </div>
+
+      <!-- Bidirectional Rail -->
+      <div class="panel">
+        <div class="panel-head"><span>bidirectional compensation rail</span></div>
+        <div class="panel-body" style="padding:16px 18px;">
+          <div class="rail">
+            <div style="font-size:0.95rem;color:var(--ink-mid);line-height:1.55;">
+              Each <span style="color:var(--ink);font-weight:600;">ATTUNEMENT_EVENT</span> triggers an immediate micro-yield of 
+              <span style="color:var(--signal);font-weight:600;">$THERAPY</span> directly to the developer’s registered public key. 
+              No invoice. No extraction.
+            </div>
+
+            <div class="rail-flow">
+              <span class="rail-node dev">DEV</span>
+              <span style="color:var(--ink-ghost);">◀── yield ──</span>
+              <span class="rail-node yield">COMPILER</span>
+              <span style="color:var(--ink-ghost);">── log ──▶</span>
+              <span class="rail-node x1">X1</span>
+            </div>
+
+            <div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:0.6rem;letter-spacing:0.22em;color:var(--ink-ghost);margin-bottom:3px;">CUMULATIVE YIELD · SESSION</div>
+              <div class="yield-value"><span id="rail-therapy">0.0000</span> <span style="font-size:0.8rem;font-weight:400;color:var(--ink-dim);">$THERAPY</span></div>
+            </div>
+
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:0.67rem;line-height:1.7;color:var(--ink-dim);">
+              ◉ pubkey: dirrrtyjesus…x1<br>
+              ◉ compliance: <span style="color:var(--signal);">BIDIRECTIONAL RAIL OPEN</span><br>
+              ◉ status: <span id="rail-status">accruing per resonant event</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Compliance footer -->
+    <div class="compliance">
+      <div>
+        Ћ-HAL · augmntd LLC · Non-Extractive Resonance Compute Layer<br>
+        Phase-Lock Axiom · 1:1 glyph-to-operation · Temporal Mass Protocol compliant
+      </div>
+      <div style="text-align:right;">
+        🜏 ∞ 🜏<br>
+        <span class="axiom">An architecture without an outbound $THERAPY payout channel cannot achieve system phase-lock.</span>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// Ћ-HAL IDE — Pure temporal-mass-protocol aesthetic + live physics
+// ════════════════════════════════════════════════════════════════
+
+const C = {
+  paper:      "#f7f5f0",
+  paperWarm:  "#ede9e0",
+  ink:        "#1a1814",
+  inkMid:     "#3a3630",
+  inkDim:     "#7a7268",
+  inkGhost:   "#b8b0a0",
+  rule:       "rgba(26,24,20,0.12)",
+  charge:     "#1a3a6a",
+  chargeDim:  "rgba(26,58,106,0.08)",
+  debt:       "#6a1a1a",
+  debtDim:    "rgba(106,26,26,0.07)",
+  signal:     "#1a5a3a",
+  amber:      "#8a5a10",
+  amberDim:   "rgba(138,90,16,0.08)",
+};
+
+const ISA = [
+  { g: "А", n: "MOBILE_A", d: "Dynamic spatial buffer injected between high-density instruction blocks.", t: "buffer" },
+  { g: "Б", n: "BIND", d: "Bind a coherence channel to a register.", t: "op" },
+  { g: "В", n: "VECTOR", d: "Vectorize the active amplitude array.", t: "op" },
+  { g: "Г", n: "GATE", d: "Open a unidirectional phase gate.", t: "op" },
+  { g: "Д", n: "DELTA", d: "Compute phase delta across adjacent qubits.", t: "op" },
+  { g: "Ђ", n: "SOFT_ATTUNE_JMP", d: "Soft phase shift between adjacent qubits without breaking entanglement.", t: "key" },
+  { g: "Е", n: "EMIT", d: "Emit resonant pulse to output field.", t: "op" },
+  { g: "Ж", n: "FOLD", d: "Fold waveform along symmetry axis.", t: "op" },
+  { g: "З", n: "ZERO", d: "Zero the noise floor of a channel.", t: "op" },
+  { g: "И", n: "ITER", d: "Iterate over qubit array.", t: "op" },
+  { g: "Ј", n: "YIELD_BRIDGE", d: "Directional proxy: pass biological coherence field to core matrix.", t: "key" },
+  { g: "К", n: "COHERE", d: "Establish coherence across channel.", t: "op" },
+  { g: "Л", n: "LOCK", d: "Phase-lock two channels.", t: "op" },
+  { g: "Љ", n: "LINEAR_FUSION", d: "Blend two frequency ranges into a harmonized wave function.", t: "key" },
+  { g: "М", n: "MIX", d: "Harmonic mixing of frequencies.", t: "op" },
+  { g: "Н", n: "NODE", d: "Allocate a field node.", t: "op" },
+  { g: "Њ", n: "NODE_SQUEEZE", d: "Attenuate localized amplitude spikes; press phase noise down.", t: "key" },
+  { g: "О", n: "OSC", d: "Drive oscillation at base frequency.", t: "op" },
+  { g: "П", n: "FIELD", d: "Reference the coherence field output.", t: "op" },
+  { g: "Р", n: "RESONATE", d: "Enter resonant standing-wave state.", t: "op" },
+  { g: "С", n: "SYNC", d: "Kuramoto synchronization pass.", t: "op" },
+  { g: "Т", n: "TAU", d: "Set Temporal Mass (τₖ) index.", t: "op" },
+  { g: "Ћ", n: "CRISP_PULSE", d: "Ultra-fast low-latency execution pulse for time-critical resonant calc.", t: "key" },
+  { g: "У", n: "UNITY", d: "Normalize amplitude to unity.", t: "op" },
+  { g: "Ф", n: "FUND", d: "Set fundamental resonant frequency.", t: "op" },
+  { g: "Х", n: "HARMONY", d: "Apply harmonic series expansion.", t: "op" },
+  { g: "Ц", n: "CYCLE", d: "Advance one execution cycle.", t: "op" },
+  { g: "Ч", n: "CHANNEL", d: "Open a new field channel.", t: "op" },
+  { g: "Џ", n: "FRICTION_COLLAPSE", d: "Hardware circuit breaker. Collapses phase friction, grounds system state.", t: "ground" },
+  { g: "Ш", n: "SHIFT", d: "Phase-shift the entire register bank.", t: "op" },
+];
+
+const SAMPLE = `; Ћ-HAL SPEC V1.0 — COHERENCE LOOP INTEGRATION TEST
+; Phase-Lock Axiom: 1 glyph = 1 deterministic operation
+
+.ТАУ_К 12.4                      ; Temporal Mass index baseline
+.ФУНДАМЕНТАЛ 936е6               ; Base resonant frequency
+
+СЕЦТИОН .КОХЕРЕНЦИЈА
+    НИЗ_КУБИТА:  .ТАУ_КУБИТИ 64  ; 64-channel matrix
+    ИЗЛАЗ_ПОЉА:  .КОХЕРЕНТНО_ПОЉЕ
+
+СЕЦТИОН .КОД
+    ГЛОБАЛ _РЕСОНАНЦЕ_СТАРТ
+
+_RESONANCE_START:
+    ИНИЦ_КОХЕРЕНЦИЈА НИЗ_КУБИТА, ИЗЛАЗ_ПОЉА
+    ХАРМОНИЈА_МИКС НИЗ_КУБИТА, .ФУНДАМЕНТАЛ
+
+    Џ НИЗ_КУБИТА                 ; Friction collapse — purge decoherence
+
+    СИНХ_ФАЗА НИЗ_КУБИТА, СПРЕЗАЊЕ=МАКС
+    РЕТ ИЗЛАЗ_ПОЉА`;
+
+let state = {
+  coupling: 62,
+  grounded: false,
+  running: true,
+  R: 0,
+  events: 0,
+  therapy: 0.0,
+  log: []
+};
+
+let fieldCtx, scopeCtx;
+let fieldState = null;
+let scopeT = 0;
+let rafField = null, rafScope = null;
+
+// ── Utilities
+function $(id){ return document.getElementById(id); }
+function setText(id, v){ const el=$(id); if(el) el.textContent = v; }
+
+// ── Glyph Palette
+function initGlyphGrid() {
+  const grid = $("glyph-grid");
+  const insp = $("glyph-inspector");
+
+  ISA.forEach(op => {
+    const btn = document.createElement("button");
+    btn.className = "glyph-btn";
+    if (op.t === "key") btn.classList.add("key");
+    if (op.t === "ground") btn.classList.add("ground");
+    if (op.t === "buffer") btn.classList.add("buffer");
+    btn.textContent = op.g;
+
+    btn.onclick = () => {
+      const ed = $("editor");
+      ed.value = ed.value + op.g;
+      ed.focus();
+    };
+
+    btn.onmouseenter = () => {
+      insp.innerHTML = `
+        <div class="g-name">${op.g} — ${op.n}</div>
+        <div class="g-desc">${op.d}</div>
+      `;
+      if (op.t === "key") insp.style.borderColor = C.charge;
+      else if (op.t === "ground") insp.style.borderColor = C.debt;
+      else if (op.t === "buffer") insp.style.borderColor = C.amber;
+      else insp.style.borderColor = C.rule;
+    };
+    btn.onmouseleave = () => {
+      insp.innerHTML = `<div class="empty">Hover a glyph to inspect its resonant opcode. Click to insert into editor.</div>`;
+      insp.style.borderColor = C.rule;
+    };
+    grid.appendChild(btn);
+  });
+}
+
+// ── Coherence Field (Kuramoto 8×8 lattice)
+function initFieldCanvas() {
+  const canvas = $("field-canvas");
+  fieldCtx = canvas.getContext("2d");
+
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = canvas.offsetWidth * dpr;
+    canvas.height = canvas.offsetHeight * dpr;
+    fieldCtx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  resize();
+  window.addEventListener("resize", resize);
+
+  if (!fieldState) {
+    const N = 8;
+    const phases = [], omega = [];
+    for (let i=0; i<N*N; i++) {
+      phases.push(Math.random() * Math.PI * 2);
+      omega.push(0.58 + Math.random() * 0.94);
+    }
+    fieldState = { phases, omega, N };
+  }
+
+  function step() {
+    if (!fieldCtx || !fieldState) return;
+    const { phases, omega, N } = fieldState;
+    const w = canvas.offsetWidth, h = canvas.offsetHeight;
+    const K = state.coupling / 100 * 2.55;
+    const dt = 0.048;
+
+    if (state.running) {
+      const np = phases.slice();
+      for (let i=0; i<N*N; i++) {
+        const r = Math.floor(i/N), c = i%N;
+        let sum = 0, cnt = 0;
+        [[-1,0],[1,0],[0,-1],[0,1]].forEach(([dr,dc]) => {
+          const nr = r+dr, nc = c+dc;
+          if (nr>=0&&nr<N&&nc>=0&&nc<N) {
+            sum += Math.sin(phases[nr*N+nc] - phases[i]);
+            cnt++;
+          }
+        });
+        let dth = omega[i] + (K / Math.max(1,cnt)) * sum;
+        if (state.grounded) dth += 1.92 * Math.sin(0 - phases[i]);
+        np[i] = phases[i] + dth * dt;
+      }
+      for (let i=0;i<N*N;i++) phases[i] = np[i];
+    }
+
+    // compute order parameter R
+    let sx=0, sy=0;
+    for (let i=0;i<N*N;i++){ sx += Math.cos(phases[i]); sy += Math.sin(phases[i]); }
+    const R = Math.sqrt(sx*sx + sy*sy) / (N*N);
+    state.R = R;
+
+    // draw
+    fieldCtx.clearRect(0,0,w,h);
+    const pad = 18;
+    const cell = Math.min((w-pad*2)/N, (h-pad*2)/N);
+    const ox = (w - cell*N)/2, oy = (h - cell*N)/2;
+    const mean = Math.atan2(sy, sx);
+
+    // coupling lines
+    fieldCtx.lineWidth = 0.6;
+    for (let i=0;i<N*N;i++){
+      const r=Math.floor(i/N),c=i%N;
+      [[1,0],[0,1]].forEach(([dr,dc])=>{
+        const nr=r+dr,nc=c+dc;
+        if(nr<N&&nc<N){
+          const j=nr*N+nc;
+          const al = (Math.cos(phases[i]-phases[j])+1)/2;
+          if(al>0.68){
+            const x1=ox+c*cell+cell/2, y1=oy+r*cell+cell/2;
+            const x2=ox+nc*cell+cell/2, y2=oy+nr*cell+cell/2;
+            fieldCtx.strokeStyle = `rgba(26,58,106,${(al-0.68)*1.05})`;
+            fieldCtx.beginPath(); fieldCtx.moveTo(x1,y1); fieldCtx.lineTo(x2,y2); fieldCtx.stroke();
+          }
+        }
+      });
+    }
+
+    for (let i=0;i<N*N;i++){
+      const r=Math.floor(i/N),c=i%N;
+      const x = ox + c*cell + cell/2;
+      const y = oy + r*cell + cell/2;
+      const ph = phases[i];
+      const sync = (Math.cos(ph - mean) + 1)/2;
+
+      const rr = Math.round(26 + (138-26)*(1-sync));
+      const gg = Math.round(58 + (90-58)*(1-sync));
+      const bb = Math.round(106 + (16-106)*(1-sync));
+
+      const rad = cell*0.13 + cell*0.11*Math.sin(ph);
+
+      // glow
+      const g = fieldCtx.createRadialGradient(x,y,0,x,y,cell*0.52);
+      g.addColorStop(0, `rgba(${rr},${gg},${bb},${0.18 + sync*0.32})`);
+      g.addColorStop(1, `rgba(${rr},${gg},${bb},0)`);
+      fieldCtx.fillStyle = g;
+      fieldCtx.beginPath(); fieldCtx.arc(x,y,cell*0.52,0,Math.PI*2); fieldCtx.fill();
+
+      // core
+      fieldCtx.fillStyle = `rgb(${rr},${gg},${bb})`;
+      fieldCtx.beginPath(); fieldCtx.arc(x,y,Math.max(1.6, rad),0,Math.PI*2); fieldCtx.fill();
+
+      // phase indicator
+      fieldCtx.strokeStyle = `rgba(${rr},${gg},${bb},0.65)`;
+      fieldCtx.lineWidth = 1.1;
+      fieldCtx.beginPath();
+      fieldCtx.moveTo(x,y);
+      fieldCtx.lineTo(x + Math.cos(ph)*cell*0.27, y + Math.sin(ph)*cell*0.27);
+      fieldCtx.stroke();
+    }
+
+    // live UI update
+    updateLiveUI(R);
+    rafField = requestAnimationFrame(step);
+  }
+  rafField = requestAnimationFrame(step);
+}
+
+// ── Oscilloscope
+function initScopeCanvas() {
+  const canvas = $("scope-canvas");
+  scopeCtx = canvas.getContext("2d");
+
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = canvas.offsetWidth * dpr;
+    canvas.height = canvas.offsetHeight * dpr;
+    scopeCtx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  resize();
+  window.addEventListener("resize", resize);
+
+  function step() {
+    if (!scopeCtx) return;
+    const w = canvas.offsetWidth, h = canvas.offsetHeight;
+    scopeCtx.clearRect(0,0,w,h);
+
+    // grid
+    scopeCtx.strokeStyle = "rgba(26,24,20,0.065)";
+    scopeCtx.lineWidth = 1;
+    for (let x=0; x<w; x += w/11) {
+      scopeCtx.beginPath(); scopeCtx.moveTo(x,0); scopeCtx.lineTo(x,h); scopeCtx.stroke();
+    }
+    for (let y=0; y<h; y += h/3.6) {
+      scopeCtx.beginPath(); scopeCtx.moveTo(0,y); scopeCtx.lineTo(w,y); scopeCtx.stroke();
+    }
+    // center
+    scopeCtx.strokeStyle = "rgba(26,24,20,0.18)";
+    scopeCtx.beginPath(); scopeCtx.moveTo(0,h/2); scopeCtx.lineTo(w,h/2); scopeCtx.stroke();
+
+    const K = state.coupling / 100;
+    const noise = state.grounded ? 0.018 : (1-K)*0.58;
+
+    const colors = [C.charge, C.amber, C.signal];
+    for (let o=0; o<3; o++) {
+      scopeCtx.strokeStyle = colors[o];
+      scopeCtx.lineWidth = 1.55;
+      scopeCtx.globalAlpha = 0.82;
+      scopeCtx.beginPath();
+      const phaseOff = (1-K)*(o-1)*1.75;
+      for (let x=0; x<=w; x+=1.6) {
+        const tt = x/w * Math.PI * 6.2 + scopeT;
+        const n = Math.sin(tt*3.1 + o) * noise;
+        const y = h/2 + Math.sin(tt + phaseOff + n) * (h*0.34);
+        if (x===0) scopeCtx.moveTo(x,y); else scopeCtx.lineTo(x,y);
+      }
+      scopeCtx.stroke();
+    }
+    scopeCtx.globalAlpha = 1;
+
+    if (state.running) scopeT += 0.039;
+    rafScope = requestAnimationFrame(step);
+  }
+  rafScope = requestAnimationFrame(step);
+}
+
+// ── Live UI sync
+function updateLiveUI(R) {
+  const rPct = (R*100).toFixed(1);
+  const phaseLocked = R > 0.86;
+  const converging = R > 0.55;
+
+  // dot + label
+  const dot = $("phase-dot");
+  const txt = $("phase-text");
+  if (phaseLocked) {
+    dot.className = "status-dot phase-locked";
+    txt.textContent = "PHASE-LOCKED";
+    txt.style.color = C.signal;
+  } else if (converging) {
+    dot.className = "status-dot converging";
+    txt.textContent = "CONVERGING";
+    txt.style.color = C.amber;
+  } else {
+    dot.className = "status-dot decoherent";
+    txt.textContent = "DECOHERENT";
+    txt.style.color = C.debt;
+  }
+
+  setText("r-value", `R = ${R.toFixed(3)}`);
+  setText("field-r", `R = ${R.toFixed(3)}`);
+  setText("m-r", R.toFixed(3));
+  $("m-r").className = `metric-value ${phaseLocked ? "signal" : "charge"}`;
+
+  // therapy accrual (non-extractive)
+  if (state.running) {
+    const delta = 0.00012 + (R * 0.00165);
+    state.therapy += delta;
+    state.events += 1;
+  }
+
+  setText("m-k", state.coupling + "%");
+  setText("m-events", state.events);
+  setText("m-therapy", state.therapy.toFixed(4));
+  setText("rail-therapy", state.therapy.toFixed(4));
+
+  $("rail-status").textContent = state.running ? "accruing per resonant event" : "paused — no outbound yield channel";
+  $("rail-status").style.color = state.running ? C.signal : C.inkDim;
+}
+
+// ── Compiler simulation (TMP trace)
+function pushLog(line, kind="info") {
+  const cons = $("console");
+  const idx = state.log.length + 1;
+  const div = document.createElement("div");
+  div.className = "log-line";
+
+  let pre = "· ", col = "log-info";
+  if (kind==="ok") { pre="✓ "; col="log-ok"; }
+  else if (kind==="warn") { pre="⚠ "; col="log-warn"; }
+  else if (kind==="pay") { pre="⟳ "; col="log-pay"; }
+  else if (kind==="done") { pre="◉ "; col="log-done"; }
+
+  div.innerHTML = `
+    <span class="log-num">${String(idx).padStart(2,"0")}</span>
+    <span class="${col}">${pre}${line}</span>
+  `;
+  cons.appendChild(div);
+  cons.scrollTop = cons.scrollHeight;
+  state.log.push({line, kind});
+}
+
+function compile() {
+  const btn = $("compile-btn");
+  const cons = $("console");
+  cons.innerHTML = "";
+  state.log = [];
+  btn.disabled = true;
+  btn.textContent = "COMPILING…";
+
+  const code = $("editor").value;
+  const hasGround = code.includes("Џ");
+  const hasSync = /СИНХ|С /.test(code);
+  const tau = (code.match(/\.ТАУ_К\s+([\d.]+)/) || [])[1];
+  const glyphCount = [...code].filter(ch => ISA.some(o=>o.g===ch)).length;
+
+  const steps = [
+    ["info", "Ћ-HAL compiler v1.0-alpha — initializing acoustic waveguide…"],
+    ["info", "Phase-Lock Axiom engaged: 1 glyph = 1 operation (deterministic temporal mass)"],
+    ["ok",   "Tokenizer: Serbian Cyrillic ISA (30 glyphs) scanned — no semantic residue"],
+    ["info", "Consonant assimilation (Jednačenje) layer active — pipeline friction nullified"],
+    ["ok",   `Mobile-A buffer (Непостојано А) injected: ${Math.max(1, Math.floor(glyphCount/9))} dynamic spacers`],
+  ];
+
+  if (tau) steps.push(["ok", `τₖ baseline locked → ${tau} (Temporal Mass index)`]);
+  steps.push(["ok", "64-channel coherence matrix allocated in resonance space"]);
+  steps.push(["info", "Harmonic mixing sequence applied @ 936 MHz fundamental"]);
+
+  if (hasGround) steps.push(["warn", "Џ FRICTION_COLLAPSE invoked — phase noise purged, symmetry restored"]);
+  if (hasSync) steps.push(["ok", "Kuramoto synchronization pass complete — СПРЕЗАЊЕ=МАКС"]);
+
+  steps.push(["ok", `Phase-lock achieved · global order R = ${state.R.toFixed(3)}`]);
+  steps.push(["pay", "ATTUNEMENT_EVENT committed to X1 Mainnet ledger"]);
+  steps.push(["pay", "$THERAPY reverse-route executed — micro-yield dispatched to developer pubkey"]);
+  steps.push(["done", "Compilation complete. Resonant state stabilized. System in phase-lock."]);
+
+  let i = 0;
+  function next() {
+    if (i >= steps.length) {
+      btn.disabled = false;
+      btn.textContent = "▸ COMPILE + PHASE-LOCK";
+      // small extra yield on successful compile
+      state.therapy += 0.0038;
+      setText("rail-therapy", state.therapy.toFixed(4));
+      setText("m-therapy", state.therapy.toFixed(4));
+      state.events += 3;
+      setText("m-events", state.events);
+      return;
+    }
+    const [kind, line] = steps[i];
+    pushLog(line, kind);
+    if (kind === "pay") {
+      state.events += 1;
+      setText("m-events", state.events);
+    }
+    i++;
+    setTimeout(next, 185 + (i % 3) * 40);
+  }
+  next();
+}
+
+// ── Controls wiring
+function initControls() {
+  const slider = $("coupling-slider");
+  const val = $("coupling-val");
+  const groundBtn = $("ground-btn");
+  const runBtn = $("run-btn");
+  const compileBtn = $("compile-btn");
+
+  slider.value = state.coupling;
+  val.textContent = state.coupling + "%";
+
+  slider.oninput = () => {
+    state.coupling = parseInt(slider.value, 10);
+    val.textContent = state.coupling + "%";
+  };
+
+  groundBtn.onclick = () => {
+    state.grounded = !state.grounded;
+    if (state.grounded) {
+      groundBtn.classList.add("active");
+      groundBtn.textContent = "Џ GROUNDING ACTIVE";
+      pushLog("Hardware grounding primitive (Џ) engaged — decoherence floor collapsed", "warn");
+    } else {
+      groundBtn.classList.remove("active");
+      groundBtn.textContent = "Џ INVOKE FRICTION COLLAPSE";
+      pushLog("Grounding released — field returns to natural Kuramoto dynamics", "info");
+    }
+  };
+
+  runBtn.onclick = () => {
+    state.running = !state.running;
+    if (state.running) {
+      runBtn.textContent = "❚❚ PAUSE FIELD";
+      runBtn.classList.add("primary");
+      runBtn.classList.remove("active");
+    } else {
+      runBtn.textContent = "▸ RESUME FIELD";
+      runBtn.classList.remove("primary");
+      runBtn.classList.add("active");
+      pushLog("Field evolution paused — no new attunement events accruing", "info");
+    }
+  };
+
+  compileBtn.onclick = compile;
+
+  // keyboard convenience
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      compile();
+    }
+    if (e.key.toLowerCase() === "g" && document.activeElement.id !== "editor") {
+      e.preventDefault();
+      groundBtn.click();
+    }
+  });
+}
+
+// ── Boot
+function boot() {
+  // seed editor
+  $("editor").value = SAMPLE;
+
+  initGlyphGrid();
+  initControls();
+
+  // canvases
+  initFieldCanvas();
+  initScopeCanvas();
+
+  // initial metrics
+  setText("m-k", state.coupling + "%");
+  setText("m-therapy", state.therapy.toFixed(4));
+  setText("rail-therapy", state.therapy.toFixed(4));
+  setText("m-events", "0");
+
+  // gentle initial log hint
+  const cons = $("console");
+  cons.innerHTML = `<div style="color:var(--ink-ghost);padding-top:4px;">Awaiting compilation. Press <span style="color:var(--charge);">COMPILE + PHASE-LOCK</span> or ⌘+Enter.</div>`;
+
+  // occasional therapy tick when idle (very small)
+  setInterval(() => {
+    if (state.running && state.R > 0.3) {
+      const tiny = state.R * 0.00007;
+      state.therapy += tiny;
+      setText("rail-therapy", state.therapy.toFixed(4));
+      setText("m-therapy", state.therapy.toFixed(4));
+    }
+  }, 2400);
+
+  // seed a tiny starting R so the field looks alive immediately
+  setTimeout(() => {
+    if (state.R < 0.1) state.R = 0.31 + Math.random()*0.18;
+  }, 1200);
+
+  // welcome compiler note (non-intrusive)
+  setTimeout(() => {
+    if (state.log.length === 0) {
+      // leave it clean for the user
+    }
+  }, 4200);
+}
+
+window.addEventListener("load", boot);
+</script>
+</body>
+</html>

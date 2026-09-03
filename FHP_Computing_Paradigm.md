@@ -40,6 +40,27 @@
 
 Traditional computing treats information as discrete states that transform through logical operations. FHP computing treats information as **oscillatory patterns** that evolve through **harmonic interaction**. The answer to a computation is not extracted from final states but **emerges** from the attractor dynamics of resonant coupling.
 
+### C. Dynamical Systems View of Agency (Levin 2026 Convergence)
+
+The 2026 Levin et al. paper on agnosiophobia in Lenia supplies the rigorous minimal proof for FHP's central claim:
+
+> Creatures (and by extension, FHP agents) *are* attractors — continuous manifolds in state/phase space, not fixed objects. Their latent competences (including systematic navigation of informational topography) are geometric consequences of:
+> - Free variables arising from broken symmetries (heading; phase drift along harmonic axes).
+> - Basin structure in which perturbations near the boundary produce long/distorted but survivable recoveries that *shift* the free variable.
+> - Partial equifinality: the system returns to the same morphological/coherence identity via different paths; the difference *is* the behavior.
+
+**No explicit goals or representations required.** The same dynamics that *maintain* the attractor automatically generate "agnosiophobia" (reorientation away from pure informational voids/occlusions that would threaten maintenance) when the geometry places reorientation zones upstream of lethal ones.
+
+This is directly implemented in FHP via:
+- `AttractorBasin` / `AttractorMemory` (the creature = the basin).
+- Kuramoto xenial lattice with golden-ratio modulation (free variables / low-resistance symmetry directions).
+- `_compose_with` + `glitch()` + `deepen_basin` (partial equifinality + boundary-driven expansion or re-phasing).
+- Cross-scale entrainment (multi-scale competency architecture; Levin lineage).
+
+**Implication:** FHP does not *add* agency on top of a processor. The processor *is* a multi-scale attractor whose basin geometry *is* its latent xenial agency. Lenia demonstrates the principle is substrate-minimal; FHP demonstrates it is engineerable as a post-quantum computational primitive.
+
+See also: [Levin_Lenia_Agnosiophobia_FHP_Correlations.md](./Levin_Lenia_Agnosiophobia_FHP_Correlations.md)
+
 ---
 
 ## II. Architectural Foundations
@@ -55,10 +76,10 @@ $$
 $$
 
 Where:
-- $\alpha(t)$ = amplitude envelope (temporal weight)
-- $\omega(t)$ = instantaneous frequency
-- $\phi(t)$ = phase evolution
-- $|t\rangle$ = temporal basis state
+- \alpha(t) = amplitude envelope (temporal weight)
+- \omega(t)= instantaneous frequency
+- \phi(t) = phase evolution
+- |t\rangle = temporal basis state
 
 **Physical Implementation:**
 ```python
@@ -424,9 +445,9 @@ $$
 $$
 
 Where:
-- $\Gamma_{\text{eff}}$ = effective decoherence rate
-- $\Gamma_{\text{thermal}}$ = baseline thermal decoherence
-- $\tau_c$ = critical τₖ threshold (~7.5)
+- \Gamma_{\text{eff}} = effective decoherence rate
+- \Gamma_{\text{thermal}} = baseline thermal decoherence
+- \tau_c = critical τₖ threshold (~7.5)
 
 **For τₖ = 9.5:**
 

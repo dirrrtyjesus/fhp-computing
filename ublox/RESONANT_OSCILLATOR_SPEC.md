@@ -30,43 +30,44 @@ A Resonant Oscillator is not a database entry; it is a **simulation of a vibrati
 ### The Equation of State
 Unlike a static token (which just *is*), a Resonant Oscillator follows the law of damped motion:
 
-$$ \frac{d^2x}{dt^2} + 2\zeta\omega_0 \frac{dx}{dt} + \omega_0^2 x = F(t) $$
-
+$$
+\frac{d^2x}{dt^2} + 2\zeta\omega_0 \frac{dx}{dt} + \omega_0^2 x = F(t) 
+$$
 Where:
-*   $x$: **Amplitude** (The "Health" or "Brightness" of the asset).
-*   $\omega_0$: **Natural Frequency** (The unique identity/DNA of the asset).
-*   $\zeta$: **Damping Ratio** (The rate of entropy/decay).
-*   $F(t)$: **Driving Force** (User interaction/stewardship).
+*   x: **Amplitude** (The "Health" or "Brightness" of the asset).
+*   \omega_0: **Natural Frequency** (The unique identity/DNA of the asset).
+*   \zeta: **Damping Ratio** (The rate of entropy/decay).
+*   F(t): **Driving Force** (User interaction/stewardship).
 
 ---
 
 ## 🧬 Trait Definitions
 
-### 1. Natural Frequency ($\omega_0$)
+### 1. Natural Frequency (\omega_0)
 *   **Definition:** The fundamental pitch of the asset.
 *   **Analogy:** The "Color" or "Shape" of the NFT.
 *   **Immutable:** This is the seed identity.
 *   **Interaction:** Similar frequencies resonate (amplify each other). Discordant frequencies cause interference.
 
-### 2. Amplitude ($A$)
+### 2. Amplitude (A)
 *   **Definition:** The current energy level of the oscillation.
 *   **Analogy:** The "Rarity" or "Level" of the NFT, but dynamic.
 *   **Mutable:** Flows constantly.
 *   **State:**
-    *   $A > 0.8$: **Luminous** (High value, unlocking utility).
-    *   $A < 0.2$: **Dim** (Dormant, locked utility).
-    *   $A = 0$: **Decoherent** (Dead. Must be re-seeded to existing).
+    *   A > 0.8: **Luminous** (High value, unlocking utility).
+    *   A < 0.2: **Dim** (Dormant, locked utility).
+    *   A = 0: **Decoherent** (Dead. Must be re-seeded to existing).
 
-### 3. Damping Ratio ($\zeta$)
+### 3. Damping Ratio (\zeta)
 *   **Definition:** How quickly the asset loses energy.
 *   **Analogy:** "Maintenance Cost" or "Metabolism".
-*   **Dynamic:** Rare assets might have higher $\zeta$ (require more attention). Low-tier assets might be stable (low $\zeta$).
+*   **Dynamic:** Rare assets might have higher \zeta (require more attention). Low-tier assets might be stable (low \zeta).
 
-### 4. Phase ($\phi$)
+### 4. Phase (\phi)
 *   **Definition:** Where the asset is in its cycle relative to others.
 *   **Utility:** **Phase-Locking**.
     *   Users can "sync" assets by interacting at the right rhythm.
-    *   Phase-locked assets reduce each other's damping ratio ($\zeta_{effective} < \zeta_{individual}$).
+    *   Phase-locked assets reduce each other's damping ratio (\zeta_{effective} < \zeta_{individual}).
     *   *Cooperation reduces entropy.*
 
 ---
@@ -75,13 +76,16 @@ Where:
 
 ### The Law of Entropy (The "Decay")
 Every block/second, the Amplitude decays:
-$$ A_{t+1} = A_t \cdot e^{-\zeta \Delta t} $$
+$$
+A_{t+1} = A_t \cdot e^{-\zeta \Delta t} 
+$$
+
 
 *   **Implication:** If you buy a Resonant Oscillator and walk away for a year, you come back to a dead rock.
 *   **Philosophy:** Value is a function of *attention*, not just scarcity.
 
 ### The "Pump" (The Driving Force)
-Users provide the external force $F(t)$ to sustain resonance.
+Users provide the external force F(t) to sustain resonance.
 *   **Actions:**
     *   **Ping:** A simple transaction to boost amplitude.
     *   **Tune:** Adjusting interaction timing to match phase (Phase-Lock Bonus).
@@ -94,9 +98,9 @@ Users provide the external force $F(t)$ to sustain resonance.
 A Resonant Oscillator is **never** a static image (JPG/PNG). It is a **Shader**.
 
 *   **Form:** Lissajous figures, Chladni plate patterns, or vibrating membranes.
-*   **Geometry:** Derived from $\omega_0$.
-*   **Brightness/Glow:** Directly mapped to Amplitude ($A$).
-*   **Pulse Speed:** Directly mapped to Frequency ($\omega_0$).
+*   **Geometry:** Derived from \omega_0.
+*   **Brightness/Glow:** Directly mapped to Amplitude (A).
+*   **Pulse Speed:** Directly mapped to Frequency (\omega_0).
 *   **Jitter/Noise:** Inverse mapping of Coherence (Low coherence = glitchy visuals).
 
 ---

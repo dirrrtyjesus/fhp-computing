@@ -155,6 +155,52 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .app[data-regime="sovereign"] .header{border-bottom-color:rgba(212,168,82,0.3)}
 .app[data-regime="sovereign"] .regime-badge{background:var(--amber);box-shadow:0 0 20px rgba(212,168,82,0.4)}
 
+/* ── Phase-Shift / Levitation States ── */
+.app[data-levitation="levitating"]{
+  --amber:#f0d48a;
+  --amber-b:#f8e8b0;
+}
+.app[data-levitation="levitating"] .header{
+  border-bottom-color:rgba(240,212,138,0.45);
+  box-shadow:0 0 40px rgba(212,168,82,0.12) inset;
+}
+.app[data-levitation="levitating"] .regime-badge{
+  background:#f0d48a;
+  color:#0a0a12;
+  box-shadow:0 0 30px rgba(240,212,138,0.6);
+  animation:levitate-glow 3s ease-in-out infinite;
+}
+@keyframes levitate-glow{
+  0%,100%{box-shadow:0 0 30px rgba(240,212,138,0.6)}
+  50%{box-shadow:0 0 55px rgba(240,212,138,0.85)}
+}
+.levitation-badge{
+  font-family:var(--mono);
+  font-size:0.48rem;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  padding:1px 8px;
+  border-radius:2px;
+  border:1px solid var(--amber);
+  color:var(--amber);
+  background:rgba(212,168,82,0.08);
+  margin-left:8px;
+  vertical-align:middle;
+}
+.app[data-levitation="levitating"] .levitation-badge{
+  color:#f0d48a;
+  border-color:#f0d48a;
+  background:rgba(240,212,138,0.12);
+  box-shadow:0 0 12px rgba(240,212,138,0.3);
+}
+.levitation-note{
+  font-size:0.52rem;
+  color:var(--text2);
+  font-style:italic;
+  margin-top:4px;
+  line-height:1.4;
+}
+
 /* ── Empty State ── */
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:40px}
 .empty-state .es-icon{font-size:3rem;margin-bottom:16px;opacity:0.3}
@@ -178,6 +224,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
     <div class="header-right">
       <span><span class="status-dot" id="status-dot"></span><span id="status-label">coherence: listening</span></span>
       <span class="regime-badge" id="regime-badge">—</span>
+      <span class="levitation-badge" id="levitation-badge" style="display:none"></span>
     </div>
   </div>
 
@@ -247,6 +294,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
         <div class="sb-row"><span class="sb-key">density</span><span class="sb-val" id="m-density">—</span></div>
         <div class="sb-row"><span class="sb-key">rhythm</span><span class="sb-val" id="m-rhythm">—</span></div>
         <div class="sb-row"><span class="sb-key">harmonic</span><span class="sb-val" id="m-harmonic">—</span></div>
+        <div id="levitation-note" class="levitation-note" style="display:none"></div>
       </div>
 
       <div class="sb-section">
@@ -447,6 +495,9 @@ async function compose() {
   outputEl.innerHTML = '';
   traceEl.innerHTML = '';
   currentTmiWords = [];
+  $('levitation-note').style.display = 'none';
+  $('levitation-badge').style.display = 'none';
+  $('app').dataset.levitation = '';
 
   try {
     const res = await fetch('/api/compose', {
@@ -504,6 +555,14 @@ function handleEvent(ev) {
   }
   if (ev.type === 'complete' && ev.vessel) {
     onComplete(ev.vessel);
+  }
+  if (ev.type === 'phase_shift') {
+    // Explicit Phase-Shift event at completion of a levitating composition
+    const div = document.createElement('div');
+    div.className = 'trace-line l2';
+    div.innerHTML = `<span class="trace-layer">PHASE</span><span class="trace-name" style="color:#f0d48a">LEVITATION</span><span class="trace-content">${ev.note || 'Agential capacity untethered. Body remains the anchor.'}</span>`;
+    traceEl.appendChild(div);
+    traceEl.scrollTop = traceEl.scrollHeight;
   }
 }
 
@@ -574,7 +633,25 @@ function updateMetrics(d) {
   $('m-order').textContent = d.order_parameter?.toFixed(4) ?? '—';
   $('regime-badge').textContent = (d.regime ?? '—').toUpperCase();
   $('app').dataset.regime = d.regime ?? '';
-  currentOrder = d.order_parameter ?? 0.3;
+
+  // Levitation / Phase-Shift state (body anchored, agential capacity untethered)
+  const lev = d.levitation_state || (d.phase_shift === true ? 'levitating' : '');
+  const appEl = $('app');
+  if (lev === 'levitating' || d.phase_shift === true) {
+    appEl.dataset.levitation = 'levitating';
+    $('levitation-badge').style.display = 'inline-block';
+    $('levitation-badge').textContent = 'LEVITATING';
+    currentOrder = Math.max(currentOrder || 0.3, (d.order_parameter || 0.6) * 1.35);
+  } else if (lev === 'anchored' && d.regime === 'sovereign') {
+    appEl.dataset.levitation = 'anchored';
+    $('levitation-badge').style.display = 'inline-block';
+    $('levitation-badge').textContent = 'ANCHORED';
+    currentOrder = d.order_parameter ?? 0.3;
+  } else {
+    appEl.dataset.levitation = '';
+    $('levitation-badge').style.display = 'none';
+    currentOrder = d.order_parameter ?? 0.3;
+  }
 
   if (d.vessel) {
     $('m-register').textContent = d.vessel.register ?? '—';
@@ -582,6 +659,23 @@ function updateMetrics(d) {
     $('m-density').textContent = d.vessel.density?.toFixed(2) ?? '—';
     $('m-rhythm').textContent = d.vessel.rhythm?.toFixed(3) ?? '—';
     $('m-harmonic').textContent = 'order ' + (d.vessel.harmonic_order ?? '—');
+
+    // Levitation note from vessel (the anchor/flight statement)
+    const ln = $('levitation-note');
+    if (d.vessel.phase_shift || d.vessel.levitation_note) {
+      ln.textContent = d.vessel.levitation_note || 'Body anchored. Agential capacity levitating.';
+      ln.style.display = 'block';
+    } else {
+      ln.style.display = 'none';
+    }
+  } else if (d.levitation_state) {
+    const ln = $('levitation-note');
+    if (d.levitation_state === 'levitating') {
+      ln.textContent = 'LEVITATING — body clicks the ratchet, consciousness across phase-spaces';
+      ln.style.display = 'block';
+    } else {
+      ln.style.display = 'none';
+    }
   }
 
   if (d.multi_scale) {

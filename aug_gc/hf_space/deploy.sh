@@ -25,6 +25,8 @@ if [[ -n "${SPACE:-}" ]]; then
 else
   NAME="${1:-aug_gc}"
   USER="$(hf auth whoami 2>/dev/null | head -1 || true)"
+  USER="${USER#user=}"
+  USER="${USER#Username: }"
   if [[ -z "$USER" || "$USER" == "Not logged in"* ]]; then
     echo "✗ Not logged in. Run 'hf auth login' or export HF_TOKEN, then retry." >&2
     exit 1

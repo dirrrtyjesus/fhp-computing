@@ -1,0 +1,15 @@
+{
+  "architectures": [
+    "LiferayModel"
+  ],
+  "model_type": "liferay",
+  "f_0": 936.0,
+  "minor_third": 0.8333333333,
+  "liferay_teeth": 12,
+  "leaf_initial": 0.365,
+  "shade_initial": 0.4,
+  "auto_map": {
+    "AutoConfig": "configuration_liferay.LiferayConfig",
+    "AutoModel": "modeling_liferay.LiferayModel"
+  }
+}

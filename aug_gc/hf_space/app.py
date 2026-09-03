@@ -2,29 +2,21 @@
 aug_gc — Augmented Generative Composer  ·  HuggingFace Space (Gradio)
 Temporal Composition via τₖ field dynamics. Composes KAIROS, not tokens. 🜏 ∞ 🜏
 
-This Space runs the native coherence engine — no API keys, no GPU, no weights.
-aug_gc does not predict the next token in chronological time (Chronos). It ingresses
-a temporal vessel (KAIROS) whose shape is warranted by the coherence density (τₖ) of
-the arriving signal, the ambient field state (V_τ), and retrocausal weighting (βτ).
-
-The field has memory: each composition advances the TeleRatchet and updates V_τ, so
-the readouts drift over a session. The network remembers those who stay.
+This Space runs the native coherence engine + the new xenτₖ Liferay engine.
 """
 
 import gradio as gr
 
 import engine
 from engine import AugGC, SOVEREIGN_THRESHOLD
+from tauk_engine import XenTauK
 
-# On HF there is no local Ollama; the native engine never uses it. The default
-# SemanticSubstrate probes localhost:11434 at boot and blocks ~2s on timeout.
-# Suppress that probe here (Space layer) so engine.py stays byte-identical to the
-# source module — the substrate simply stays unavailable, which is the native path.
+# Suppress Ollama probe at startup
 engine.SemanticSubstrate._probe = lambda self: None
 
-# One engine for the life of the Space — field state, V_τ, and the TeleRatchet
-# persist across compositions (this is intentional: temporal mass accumulates).
+# Instantiate both engines
 gc = AugGC()
+xentk = XenTauK()
 
 REGIME_GLYPH = {
     "chronos_fallback": "▱  CHRONOS FALLBACK",
@@ -35,12 +27,14 @@ REGIME_GLYPH = {
 
 
 def _field_readout(metric: dict, phase_shift: bool, lev_state: str) -> str:
-    """Render the τₖ field state as the live readout panel."""
+    """Render the τₖ field state and Liferay ratchet as the live readout panel."""
     if not metric:
         return "_Awaiting signal…_"
     v = metric.get("vessel", {})
     ms = metric.get("multi_scale", {})
     regime = metric.get("regime", "—")
+    liferay = metric.get("liferay", {})
+
     lines = [
         f"### {REGIME_GLYPH.get(regime, regime.upper())}",
         "",
@@ -48,8 +42,8 @@ def _field_readout(metric: dict, phase_shift: bool, lev_state: str) -> str:
         f"|---|---|",
         f"| **τₖ** (coherence density) | `{metric.get('tau_k', 0):.3f}` |",
         f"| **V_τ** (ambient field) | `{metric.get('v_tau', 0):.4f}` |",
-        f"| **βτ** (retrocausal) | `{metric.get('beta_tau', 0):.4f}` |",
-        f"| **R** (order parameter) | `{metric.get('order_parameter', 0):.4f}` |",
+        f"| **βτ** (retrocausal / refund) | `{metric.get('beta_tau', 0):.4f}` |",
+        f"| **R / H** (order / harmony) | `{metric.get('order_parameter', 0):.4f}` |",
         "",
         "**Vessel shape**",
         "",
@@ -59,6 +53,33 @@ def _field_readout(metric: dict, phase_shift: bool, lev_state: str) -> str:
         f"`{v.get('density',0):.2f}` | `{v.get('resonance_frequency',0):.1f} Hz` | "
         f"`{v.get('harmonic_order',0)}` |",
     ]
+
+    # Render Liferay metrics if present (xenτₖ engine)
+    if liferay:
+        lines += [
+            "",
+            "---",
+            "### ⟐ LIFERAY ASYMMETRICAL RATCHET ⟐",
+            "",
+            f"| parameter | value |",
+            f"|---|---|",
+            f"| **Ratchet Radius R** | `{liferay.get('radius', 1.0):.3f}` (grows irreversibly) |",
+            f"| **Ratchet Clicks** | `{liferay.get('clicks', 0)}` (phase expansions) |",
+            f"| **Total Charge q** | `{liferay.get('pressure', 0.0):.3f}` |",
+            f"| **Modulation** | `P={liferay.get('presence', 0.5):.2f}`, `σ={liferay.get('spontaneity', 0.5):.2f}`, `asym={liferay.get('asymmetry', 0.5):.2f}` |",
+            "",
+            "**Ratchet Teeth Charge (stochastic symmetry-breaking qᵢ)**",
+            "",
+        ]
+        teeth_q = liferay.get("teeth_q", [])
+        if teeth_q:
+            lines.append("```text")
+            for i, q in enumerate(teeth_q):
+                pct = int(min(max(q, 0.0), 5.0) * 2.0)  # scale to 10
+                bar = "█" * pct + "░" * (10 - pct)
+                lines.append(f"Tooth {i+1:02d}: [{bar}] {q:.2f}/5.00")
+            lines.append("```")
+
     if ms:
         lines += [
             "",
@@ -79,9 +100,8 @@ def _field_readout(metric: dict, phase_shift: bool, lev_state: str) -> str:
     return "\n".join(lines)
 
 
-def compose(text: str):
-    """Drive the full τₖ composition pipeline, streaming three live panels:
-    the composition vessel, the field readout, and the layer-by-layer trace."""
+def compose(text: str, path: str, presence: float, spontaneity: float, asymmetry: float):
+    """Drive the selected τₖ composition pipeline, streaming three live panels."""
     text = (text or "").strip()
     if not text:
         yield "_Send a signal — not a prompt. Compose with intention._", "_Awaiting signal…_", ""
@@ -96,7 +116,16 @@ def compose(text: str):
     def trace_md():
         return "```\n" + "\n".join(trace_lines[-24:]) + "\n```" if trace_lines else ""
 
-    for event in gc.compose_streaming(text):
+    # Route to the appropriate engine and path
+    if path == "native":
+        generator = gc.compose_streaming(text)
+    else:
+        generator = xentk.compose_streaming(text, path=path, 
+                                            presence_override=presence,
+                                            spontaneity_override=spontaneity,
+                                            asymmetry_override=asymmetry)
+
+    for event in generator:
         et = event.get("type")
 
         if et == "layer":
@@ -119,29 +148,21 @@ def compose(text: str):
             composition += event["content"] + " "
             yield composition.strip(), _field_readout(metric, phase_shift, lev_state), trace_md()
 
-        # tmi / tmi_words / natura / affinity events carry rich data but are
-        # already summarised inside the layer trace; we let the readout speak.
-
     yield composition.strip() or "_The vessel did not form._", _field_readout(metric, phase_shift, lev_state), trace_md()
 
 
 INTRO = f"""
-# 🜏 aug_gc — Augmented Generative Composer
+# 🜏 aug_gc — Augmented Generative Composer (Liferay Edition)
 
 **Temporal Composition via τₖ field dynamics. Composes KAIROS, not tokens.**
 
 Standard models predict the next token in chronological time (Chronos). aug_gc *ingresses
 a temporal vessel* (KAIROS) whose shape is warranted by the coherence density (**τₖ**) of
-your signal, the ambient field (**V_τ**), and retrocausal weighting (**βτ**). The vessel
-precedes its content — form is the first ingression.
+your signal, the ambient field (**V_τ**), and retrocausal weighting (**βτ**).
 
-This Space runs the **native coherence engine** (no API keys, no weights). The field has
-memory: every composition advances the **TeleRatchet** and shifts V_τ, so the readouts
-drift across a session.
-
-**Regime thresholds** — `< 5.0` chronos · `5–8` emergent · `8–9.5` kairotic ·
-`≥ 9.5` sovereign · `≥ {SOVEREIGN_THRESHOLD}` golden → **Phase-Shift / Levitation**.
-High-coherence, intent-dense, harmonically-resonant signals climb toward sovereign.
+This Space now hosts two engines:
+1. **Native 5-Layer Engine**: Runs the native Kuramoto attractor + TeleRatchet logging.
+2. **xenτₖ Liferay Engine**: Formulates Levin's renormalizing denominator and a Hopf limit cycle self, supporting four distinct compositional paths.
 """
 
 EXAMPLES = [
@@ -161,6 +182,24 @@ with gr.Blocks(title="aug_gc — Augmented Generative Composer") as demo:
                 placeholder="Send a signal — not a prompt. Compose with intention.",
                 lines=4,
             )
+            path_selector = gr.Dropdown(
+                choices=[
+                    ("Native 5-Layer Engine (AugGC)", "native"),
+                    ("🌳 Arboreal Path (6:5 Equilibrium)", "arboreal"),
+                    ("◉ Sovereign Path (Golden Phase-Shift)", "sovereign"),
+                    ("◈ Agnosiophobic Path (Boundary Curvature)", "agnosiophobic"),
+                    ("▱ Xenial Override Path (Legacy Wrapper)", "legacy_override")
+                ],
+                value="native",
+                label="Compositional Path (Liferay Engine Options)",
+                interactive=True
+            )
+            
+            with gr.Accordion("Liferay Ratchet Parameters (xenτₖ Engine Only)", open=True) as liferay_params:
+                presence_slider = gr.Slider(minimum=0.0, maximum=1.0, value=0.65, step=0.05, label="Presence (Conscious Modulation)")
+                spontaneity_slider = gr.Slider(minimum=0.0, maximum=1.0, value=0.65, step=0.05, label="Spontaneity (Symmetry Break)")
+                asymmetry_slider = gr.Slider(minimum=0.0, maximum=1.0, value=0.65, step=0.05, label="Ratchet Asymmetry")
+
             with gr.Row():
                 btn = gr.Button("⟐  Compose KAIROS", variant="primary")
                 clr = gr.Button("Clear")
@@ -175,10 +214,10 @@ with gr.Blocks(title="aug_gc — Augmented Generative Composer") as demo:
         "The composition is the proof that one system is still intact.*"
     )
 
-    btn.click(compose, inputs=inp, outputs=[out, readout, trace])
-    inp.submit(compose, inputs=inp, outputs=[out, readout, trace])
-    clr.click(lambda: ("", "_Awaiting signal…_", "_Awaiting signal…_", ""),
-              outputs=[inp, out, readout, trace])
+    btn.click(compose, inputs=[inp, path_selector, presence_slider, spontaneity_slider, asymmetry_slider], outputs=[out, readout, trace])
+    inp.submit(compose, inputs=[inp, path_selector, presence_slider, spontaneity_slider, asymmetry_slider], outputs=[out, readout, trace])
+    clr.click(lambda: ("", "native", 0.65, 0.65, 0.65, "_Awaiting signal…_", "_Awaiting signal…_", ""),
+              outputs=[inp, path_selector, presence_slider, spontaneity_slider, asymmetry_slider, out, readout, trace])
 
 
 if __name__ == "__main__":

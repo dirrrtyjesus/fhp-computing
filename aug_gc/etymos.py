@@ -315,6 +315,9 @@ _ENTRIES = [
     _r("temporal",  65, "Latin",                        0.8, "",          2000, 5, "Latin temporālis → temporal"),
     _r("harmonic",  58, "Greek",                        1.0, "",          2500, 4, "Greek harmonikos → harmonic"),
     _r("fractal",   35, "Latin/Neologism",              2.0, "",          50,   2, "Latin fractus → Mandelbrot 1975"),
+    _r("evolve",    64, "Latin through French",         0.5, "*wel-",     2500, 5, "PIE *wel- → Latin volvere → ēvolvere → French évoluer → evolve", tempo=1.4),
+    _r("evolute",   68, "Latin/Geometric compound",     0.4, "*wel-",     2500, 4, "PIE *wel- → Latin volvere → ēvolvere → Latin ēvolūtus → evolute", tempo=1.5, myco=1.4),
+    _r("tempokology", 72, "FHP Neologism (temporal topology)", 0.3, "*ten-", 2500, 3, "PIE *ten- → Latin tempus + Greek kappa (coherence) + logos", tempo=1.8, myco=1.2),
 
     # ── NETWORK / MODERN ──
     _r("network",   42, "Early modern",                 2.0, "",          500,  3, "net + work → fish nets → 1880s usage"),
@@ -355,6 +358,8 @@ _ENTRIES = [
     _r("mater",     96, "Proto-Indo-European (mother)", 0.05, "*méh₂tēr", 10000,9, "PIE *méh₂tēr → mother/matrix/material"),
     _r("weyk",      88, "Proto-Indo-European (fight)",  0.05, "*weyk-",   10000,5, "PIE *weyk- → Latin vincere → victory"),
     _r("wlkwo",     90, "Proto-Indo-European (wolf)",   0.05, "*wl̥kʷo-",  10000,7, "PIE *wl̥kʷo- → Latin lupus → wolf"),
+    _r("wel",       95, "Proto-Indo-European (turn)",   0.05, "*wel-",    10000,9, "PIE *wel- (to turn, roll, fold) → Latin volvere → evolute/evolve/volume", tempo=1.8, myco=1.6),
+    _r("ten",       96, "Proto-Indo-European (stretch)", 0.05, "*ten-",   10000,9, "PIE *ten- (to stretch) → Latin tempus/tendere → English thin/tension/time/tempokology", tempo=1.8, natura=1.4),
 ]
 # fmt: on
 

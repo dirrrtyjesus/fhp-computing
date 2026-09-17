@@ -61,6 +61,12 @@ Traditional computing treats information as discrete states that transform throu
   - Multi-scale coherence analysis
   - Quantum-classical bridge modeling
 
+### Model Context Protocol (MCP) & Bridges
+- **[augmntd-mcp/](augmntd-mcp/)** - augLABS augmntd MCP (Xenware) Enterprise Harmonic Bridge (Node.js 22 LTS / TypeScript, Google Cloud Run)
+- **[augLABS augmntd MCP (Xenware) Enterprise Harmonic Bridge Specification.md](augLABS%20augmntd%20MCP%20%28Xenware%29%20Enterprise%20Harmonic%20Bridge%20Specification.md)** - Architectural standard & client delivery blueprint
+- **[augmntdMCPdeployment.md](augmntdMCPdeployment.md)** - Production Cloud Run container deployment specification
+- **[cdt-mcp-server/](cdt-mcp-server/)** - Coherence Data Types (CDT) reference Python MCP server
+
 ### Meme Propagation
 - **[MEME_FractalHarmonic.md](MEME_FractalHarmonic.md)** - MEMEk-compliant meme seeds for cultural propagation
 
